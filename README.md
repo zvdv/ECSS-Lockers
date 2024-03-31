@@ -1,6 +1,6 @@
 # Lockers
 
-This is a website for the registration and management of lockers. It was built during my time as the Director of IT for the University of Victoria's Engineering Student Society, so it may not meet your needs exactly.
+This is a website for the registration and management of lockers. It was built for the University of Victoria's Engineering and Computer Science Students' Society, so it may not meet your needs exactly.
 
 ## Running
 

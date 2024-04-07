@@ -1,10 +1,8 @@
-import { Kysely } from "kysely";
-import { PlanetScaleDialect } from "kysely-planetscale";
+import { createClient } from "@libsql/client";
 
-export const db = new Kysely({
-  dialect: new PlanetScaleDialect({
-    url: process.env.DATABASE_URL,
-  }),
+export const db = createClient({
+  url: process.env.DATABASE_URL,
+  authToken: process.env.DB_AUTH,
 });
 
 function range(start, end) {

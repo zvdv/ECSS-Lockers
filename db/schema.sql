@@ -8,8 +8,7 @@ CREATE TABLE user (
 
 DROP TABLE IF EXISTS locker;
 CREATE TABLE locker (
-    id varchar(255) NOT NULL,
-    PRIMARY KEY(id)
+    id INTEGER PRIMARY KEY NOT NULL,
 );
 
 DROP TABLE IF EXISTS registration;

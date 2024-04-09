@@ -1,4 +1,4 @@
-FROM node:20-alpine3.16 AS build
+FROM node:20.11-alpine AS build
 
 WORKDIR /app
 COPY package.json .
@@ -9,7 +9,7 @@ COPY . .
 RUN npm run build
 RUN npm run node:build
 
-FROM node:20-alpine3.16 AS deploy
+FROM node:20.11-alpine AS deploy
 
 WORKDIR /app
 

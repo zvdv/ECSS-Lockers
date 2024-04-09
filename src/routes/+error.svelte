@@ -13,7 +13,7 @@
     </h1>
     <p>
       Something went wrong. If you continue to see this error, please contact
-      the ESS Director of IT.
+      the ECSS Director of IT.
     </p>
   </main>
 </Shell>

@@ -23,7 +23,7 @@ cron.schedule("0 * * * *", async () => {
       await sendExpiryEmail(user, locker);
       await db
         .updateTable("registration")
-        .set({ expiryEmailSent: new Date() })
+        .set({ expiryEmailSent: new Date().toISOString() })
         .executeTakeFirstOrThrow();
       console.debug("sent expiry email", {
         user,

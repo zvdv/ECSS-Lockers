@@ -1,8 +1,9 @@
 import { createClient } from "@libsql/client";
+import { env } from "$env/dynamic/private";
 
 export const db = createClient({
-  url: process.env.DATABASE_URL,
-  authToken: process.env.DB_AUTH,
+  url: env.DATABASE_URL,
+  authToken: env.DB_AUTH,
 });
 
 function range(start, end) {

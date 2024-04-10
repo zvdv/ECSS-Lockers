@@ -38,18 +38,18 @@ export async function sendRegisterEmail(
   await client.sendAsync({
     from: `Lockers <${env.GMAIL_USER}>`,
     to: email,
-    subject: `ESS Locker Registration: ${locker}`,
+    subject: `ECSS Locker Registration: ${locker}`,
     text,
   });
 }
 
 export async function sendRegisterLimitEmail(email: string) {
-  const text = `You have reached the maximum number of lockers you can register. Please contact the ESS to request more, or transfer ownership of one of your lockers to another user.
+  const text = `You have reached the maximum number of lockers you can register. Please contact the ECSS to request more, or transfer ownership of one of your lockers to another user.
   .`;
   await client.sendAsync({
     from: `Lockers <${env.GMAIL_USER}>`,
     to: email,
-    subject: `ESS Locker Registration Limit Reached`,
+    subject: `ECSS Locker Registration Limit Reached`,
     text,
   });
 }
@@ -60,7 +60,7 @@ export async function sendLoginEmail(email: string) {
   await client.sendAsync({
     from: `Lockers <${env.GMAIL_USER}>`,
     to: email,
-    subject: `ESS Locker Login`,
+    subject: `ECSS Locker Login`,
     text,
   });
 }
@@ -70,7 +70,7 @@ export async function sendAccountDoesNotExistEmail(email: string) {
   await client.sendAsync({
     from: `Lockers <${env.GMAIL_USER}>`,
     to: email,
-    subject: `ESS Locker Account Does Not Exist`,
+    subject: `ECSS Locker Account Does Not Exist`,
     text,
   });
 }
@@ -83,7 +83,7 @@ export async function sendTransferEmail(email: string, locker: string) {
   await client.sendAsync({
     from: `Lockers <${env.GMAIL_USER}>`,
     to: email,
-    subject: `ESS Locker Transfer Request: ${locker}`,
+    subject: `ECSS Locker Transfer Request: ${locker}`,
     text,
   });
 }
@@ -95,7 +95,7 @@ export async function sendExpiryEmail(email: string, locker: string) {
   await client.sendAsync({
     from: `Lockers <${env.GMAIL_USER}>`,
     to: email,
-    subject: `ESS Locker Expiry: ${locker}`,
+    subject: `ECSS Locker Expiry: ${locker}`,
     text: msg,
   });
 }

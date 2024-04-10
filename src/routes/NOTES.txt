@@ -1,0 +1,7 @@
+In (app):
+    Nothing in flash, 
+    In /lockers, /login, /magic and in general,
+    anything called +page.server.ts makes some references to db, but hopefully doesn't need changes.
+In admin:
+    Same idea, anything called +page.server.ts or just +server.ts references db.
+Changed "ESS" to "ECSS" in +error.svelte.

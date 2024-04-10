@@ -1,0 +1,2 @@
+I updated the logo images to ECSS ones
+For simplicity I kept the file names with ess so I don't have to go searching for where they're used.

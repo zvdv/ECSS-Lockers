@@ -1,0 +1,5 @@
+Nothing in components or css should need to be changed here.
+Maybe date.ts for date formatting?
+I have updated db.ts to reference a Turso db, need to test.
+Changed some "ESS" to "ECSS" in email.ts.
+Nothing else should need updates.

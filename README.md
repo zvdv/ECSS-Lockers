@@ -2,13 +2,18 @@
 
 This is a website for the registration and management of lockers. It was built for the University of Victoria's Engineering and Computer Science Students' Society, so it may not meet your needs exactly.
 
+## Updates
+
+I am currently in the process of updating this site to work with a SQLite Turso database, because PlanetScale is getting rid of their free tier.
+
 ## Running
 
 The recommended way to run this software is via the Dockerfile included with the repo. These are the required environment variables for it to work:
 
 - `JWT_SECRET`: a randomly chosen value for signing tokens
 - `ADMIN_PASSWORD`: the password for the admin panel. Enter the on the login page instead of the email to access the admin panel.
-- `DATABASE_URL`: the connection url for a Planetscale database
+- `DATABASE_URL`: the connection url for a ~~Planetscale~~ Turso database
+- `DATABASE_AUTH`: the authentication token for a Turso database
 - `GMAIL_USER`: the email for a gmail account
 - `GMAIL_PASSWORD` an application password for a gmail account. This is specially generated for the application, not your regular login.
 - `ORIGIN`: the expected origin URL. This is required to prevent CSRF attacks. You may disable this in the SvelteKit config file.

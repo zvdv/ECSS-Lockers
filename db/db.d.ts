@@ -6,8 +6,8 @@ export interface Registration {
   locker: string;
   user: string;
   name: string;
-  expiry: Date;
-  expiryEmailSent: Date | null;
+  expiry: string;
+  expiryEmailSent: string | null;
 }
 
 export interface User {

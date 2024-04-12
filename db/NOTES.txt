@@ -1,3 +1,5 @@
-If we switch to persistent volume storage, may not need anything in this folder.
-Or at least it may be easier to start fresh.
-I changed the date types in db.d.ts to strings to fit with SQLite date text formats, possibly need more formatting.
+Currently I am editing under the assumption that we're switching to Turso,
+but persistent volume storage is another option, and in that case this folder
+will probably need a fresh start.
+I changed the date types in db.d.ts to strings to fit with SQLite date text formats,
+possibly need more formatting.

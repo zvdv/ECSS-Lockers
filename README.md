@@ -4,7 +4,7 @@ This is a website for the registration and management of lockers. It was built f
 
 ## Updates
 
-I am currently in the process of updating this site to work with a SQLite Turso database, because PlanetScale is getting rid of their free tier.
+I am currently in the process of updating this site to work with a SQLite Turso database, because PlanetScale is getting rid of their free tier. All lot of the infrastructure in here is new to me, so I'm learning as I go. All the NOTES.txt files are my notes-to-self to keep track of what I've changed or tested.
 
 ## Running
 

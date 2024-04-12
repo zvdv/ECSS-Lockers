@@ -27,3 +27,5 @@ but they should be able to just sit there for now.
 In package.json
 Added: "@libsql/client": "0.6.0",
 to dependancies.
+
+Trying to build the docker image comes up with an error about installing modules, so I need to come back to this.

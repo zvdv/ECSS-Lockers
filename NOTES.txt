@@ -1,28 +1,5 @@
-The package-lock.json and package.json both had PlanetScale-related modules as part of the dependancies,
-I replaced them with what I think is needed, we'll see.
-
-In package-lock.json
-Removed:
-    "kysely-planetscale": "^1.3.0",
-    "@planetscale/database": "^1.6.0",
-
-    "node_modules/@planetscale/database": {
-      "version": "1.7.0",
-      "resolved": "https://registry.npmjs.org/@planetscale/database/-/database-1.7.0.tgz",
-      "integrity": "sha512-lWR6biXChUyQnxsT4RT1CIeR3ZJvwTQXiQ+158MnY3VjLwjHEGakDzdH9kwUGPk6CHvu6UeqRXp1DgUOVHJFTw==",
-      "engines": {
-        "node": ">=16"
-      }
-    },
-Added:
-    "@libsql/client": "^0.6.0",
-
-    "node_modules/@libsql/client":{
-      "version": "0.6.0"
-      [may need more stuff here I just don't know what yet]
-    },
-There's still the kysely-planetscale one sitting in there, and maybe another @planetscale/database,
-but they should be able to just sit there for now.
+The package.json both had PlanetScale-related modules as part of the dependancies,
+I left them but added the libsql that I think we need, we'll see.
 
 In package.json
 Added: "@libsql/client": "0.6.0",

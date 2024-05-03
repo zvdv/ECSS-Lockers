@@ -1,6 +1,6 @@
 services:
   ecssapp:
-    image: hn275/ecss-locker:latest
+    build: .
     container_name: ecss-locker-app
     environment:
       - JWT_SECRET

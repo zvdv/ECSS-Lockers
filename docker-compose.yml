@@ -1,13 +1,31 @@
 services:
+  ecssapp:
+    image: hn275/ecss-locker:latest
+    container_name: ecss-locker-app
+    environment:
+      - JWT_SECRET
+      - ADMIN_PASSWORD
+      - GMAIL_USER
+      - GMAIL_PASSWORD
+      - ORIGIN
+      - MYSQL_HOST
+      - MYSQL_PASSWORD
+      - MYSQL_USER
+      - MYSQL_PORT
+      - MYSQL_DATABASE
+    ports:
+      - 3000:3000
+
   ecssdb:
     image: mysql:8.4.0
-    container_name: ecssdb
+    container_name: ecss-locker-db
     environment:
-      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
-      - MYSQL_USER=${MYSQL_USER}
-      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_ROOT_PASSWORD
+      - MYSQL_PASSWORD
+      - MYSQL_USER
+      - MYSQL_DATABASE
     volumes:
       - ./db/.data/:/var/lib/mysql
+      - ./db:/home/
     ports:
       - 3306:3306

@@ -5,6 +5,7 @@
   "scripts": {
     "db:seed": "node db/seed-lockers.js",
     "db:codegen": "kysely-codegen --out-file db/db.d.ts",
+    "db:migrate": "sh ./migratedb.sh",
     "dev": "vite dev",
     "node:dev": "tsx watch --tsconfig node-src/tsconfig.json -r dotenv/config node-src/index.ts",
     "node:build": "esbuild --bundle --platform=node --format=esm --packages=external --outdir=build --sourcemap '--alias:$env/dynamic/private=./node-src/polyfills/env.ts' '--alias:$app/paths=./node-src/polyfills/app-paths.ts' node-src/index.ts",

@@ -1,0 +1,13 @@
+services:
+  ecssdb:
+    image: mysql:8.4.0
+    container_name: ecssdb
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+    volumes:
+      - ./db/.data/:/var/lib/mysql
+    ports:
+      - 3306:3306

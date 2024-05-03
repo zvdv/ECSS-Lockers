@@ -1,10 +1,17 @@
 import { env } from "$env/dynamic/private";
-import { Kysely } from "kysely";
-import { PlanetScaleDialect } from "kysely-planetscale";
+import { Kysely, MysqlDialect } from "kysely";
+import { createPool } from "mysql2";
 import type { DB } from "../../db/db.d.ts";
 
-export const db = new Kysely<DB>({
-  dialect: new PlanetScaleDialect({
-    url: env.DATABASE_URL,
-  }),
-});
+const dialect = new MysqlDialect({
+    pool: createPool({
+        database: env.MYSQL_DATABASE,
+        host: env.MYSQL_HOST,
+        user: env.MYSQL_USER,
+        password: env.MYSQL_PASSWORD,
+        port: parseInt(env.MYSQL_PORT),
+        connectionLimit: 10,
+    }),
+})
+
+export const db = new Kysely<DB>({ dialect });

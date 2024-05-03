@@ -1,23 +1,28 @@
 {
-  "plugins": [
-    "prettier-plugin-svelte",
-    "prettier-plugin-tailwindcss",
-    "@trivago/prettier-plugin-sort-imports"
-  ],
-  "pluginSearchDirs": ["."],
-  "importOrder": [
-    "<THIRD_PARTY_MODULES>",
-    "^@sveltejs/(.*)$",
-    "^\\$!(lib)(.*)$",
-    "^\\$lib(.*)$",
-    "^[./]"
-  ],
-  "overrides": [
-    {
-      "files": "*.svelte",
-      "options": {
-        "parser": "svelte"
-      }
-    }
-  ]
+    "tabWidth": 2,
+    "useTabs": true,
+    "semi": true,
+    "plugins": [
+        "prettier-plugin-svelte",
+        "prettier-plugin-tailwindcss",
+        "@trivago/prettier-plugin-sort-imports"
+    ],
+    "pluginSearchDirs": [
+        "."
+    ],
+    "importOrder": [
+        "<THIRD_PARTY_MODULES>",
+        "^@sveltejs/(.*)$",
+        "^\\$!(lib)(.*)$",
+        "^\\$lib(.*)$",
+        "^[./]"
+    ],
+    "overrides": [
+        {
+            "files": "*.svelte",
+            "options": {
+                "parser": "svelte"
+            }
+        }
+    ]
 }

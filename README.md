@@ -45,6 +45,38 @@ Note that this project uses SvelteKit's NodeJS adapter. This means that shared s
 
 If `git push` hangs, you may need to refer to [this solution](https://stackoverflow.com/a/68711337). I'm assuming this occurs because there are large files in the `vendor` directory.
 
+## Deployment
+
+The app is currently hosted with Google Cloud Platform on a micro instance of Google Compute
+Engine (GCE) and with Docker.
+
+### Build image
+
+Build the image and push it to docker registry, since our local machines are a lot faster at
+this than having to build it on the tiny GCE instance.
+
+```sh
+npm run docker:deploy
+```
+
+- Note that currently it's being pushed onto my registry at `hn275/ecss-locker`. To whom might
+  be dealing with deployment in the future, you will need to modify the
+  [docker-compose.yml](./docker-compose.yml) file accordingly.
+
+To apply the changes, ssh into the GCE server and changed into the directory <insert dir here>
+then restart the docker container
+
+```sh
+docker compose down && docker compose up -d
+```
+
+### Database migration
+
+The [schema.sql](./db/schema.sql) file now contains the code queries to create the table and to seed
+all the lockers.
+
+TODO: write this procedure down
+
 ## Design
 
 This website was designed for maximum usability on mobile devices with unstable or slow internet. Excluding admin functionality, the entire website has a mobile-first layout and works without JavaScript. JavaScript is used to progressively enhance the experience with features such as loading states and a client-side router.

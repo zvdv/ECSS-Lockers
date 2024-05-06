@@ -1,4 +1,17 @@
 services:
+  nginx:
+    image: nginx:latest
+    volumes:
+      - ./etc/nginx/templates:/etc/nginx/templates
+      - ./etc/nginx/tls:/etc/nginx/tls
+      - ./etc/nginx/logs:/etc/nginx/logs
+    ports:
+      - 80:80
+      - 443:443
+    environment:
+      - NGINX_PROXY_HOST=localhost
+      - NGINX_PROXY_PORT=3000
+
   ecssapp:
     image: hn275/ecss-locker:latest
     container_name: ecss-locker-app

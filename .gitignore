@@ -11,3 +11,4 @@ vite.config.ts.timestamp-*
 /db/.data
 /etc/nginx/logs/*
 /etc/nginx/tls/*
+.mysql/data/

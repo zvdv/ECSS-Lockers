@@ -2,15 +2,17 @@ services:
   nginx:
     image: nginx:latest
     volumes:
-      - ./etc/nginx/templates:/etc/nginx/templates
-      - ./etc/nginx/tls:/etc/nginx/tls
-      - ./etc/nginx/logs:/etc/nginx/logs
+      - ./deploy/etc/nginx/templates:/etc/nginx/templates
+      - ./deploy/etc/nginx/tls:/etc/nginx/tls
+      - ./deploy/etc/nginx/logs:/etc/nginx/logs
     ports:
       - 80:80
       - 443:443
     environment:
-      - NGINX_PROXY_HOST=localhost
+      - NGINX_PROXY_HOST=ecssapp
       - NGINX_PROXY_PORT=3000
+    links:
+      - ecssapp:ecssapp
 
   ecssapp:
     image: hn275/ecss-locker:latest
@@ -26,8 +28,6 @@ services:
       - MYSQL_USER
       - MYSQL_PORT
       - MYSQL_DATABASE
-    ports:
-      - 3000:3000
 
   ecssdb:
     image: mysql:8.4.0
@@ -38,7 +38,7 @@ services:
       - MYSQL_USER
       - MYSQL_DATABASE
     volumes:
-      - ./db/.data/:/var/lib/mysql
-      - ./db:/home/
+      - ./.mysql/data/:/var/lib/mysql/
+      - ./deploy/:/home/
     ports:
       - 3306:3306

@@ -61,21 +61,31 @@ npm run docker:deploy
 
 - Note that currently it's being pushed onto my registry at `hn275/ecss-locker`. To whom might
   be dealing with deployment in the future, you will need to modify the
-  [docker-compose.yml](./docker-compose.yml) file accordingly.
-
-To apply the changes, ssh into the GCE server and changed into the directory <insert dir here>
-then restart the docker container
-
-```sh
-docker compose down && docker compose up -d
-```
+  [docker-compose.yml](./docker-compose.yml) file accordingly, as well as the `docker:deploy`
+  npm script in [package.json](./package.json).
 
 ### Database migration
 
 The [schema.sql](./db/schema.sql) file now contains the code queries to create the table and to seed
 all the lockers.
 
-TODO: write this procedure down
+### Deploying with Docker
+
+Copy the `./deploy/` directory and the `./docker-compose.yml` file onto VM/cloud instance.
+
+On your cloud instance, start the docker in daemon mode (you may have to run it with `sudo` if your
+user is not in the docker group):
+
+```sh
+docker compose up -d
+```
+
+Migrate the database with the script in `./deploy/migratedb.sh`.\
+**NOTE:** this wipes the database clean before applying the database schema.
+
+```sh
+sh ./deploy/migratedb.sh
+```
 
 ## Design
 

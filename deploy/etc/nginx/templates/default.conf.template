@@ -1,0 +1,25 @@
+error_log  logs/error.log;
+
+server { 
+    listen       80;
+    server_name  lockers.haln.dev;
+    access_log   logs/lockers.access.log  main;
+
+    # return 301 https://$host$request_uri;
+    location / {
+        proxy_pass http://${NGINX_PROXY_HOST}:${NGINX_PROXY_PORT};
+    }
+}
+
+server {
+    # listen              443 ssl;
+    # ssl_certificate     /etc/nginx/tls/locker.crt;
+    # ssl_certificate_key /etc/nginx/tls/locker.key;
+    listen 443;
+    server_name         lockers.haln.dev;
+    access_log          logs/lockers.access.log  main;
+
+    location / {
+        proxy_pass http://${NGINX_PROXY_HOST}:${NGINX_PROXY_PORT};
+    }
+}

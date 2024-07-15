@@ -9,4 +9,5 @@ Dockerfile
 build
 node_modules
 
+.mysql/.data
 fly.toml

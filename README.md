@@ -45,6 +45,48 @@ Note that this project uses SvelteKit's NodeJS adapter. This means that shared s
 
 If `git push` hangs, you may need to refer to [this solution](https://stackoverflow.com/a/68711337). I'm assuming this occurs because there are large files in the `vendor` directory.
 
+## Deployment
+
+The app is currently hosted with Google Cloud Platform on a micro instance of Google Compute
+Engine (GCE) and with Docker.
+
+### Build image
+
+Build the image and push it to docker registry, since our local machines are a lot faster at
+this than having to build it on the tiny GCE instance.
+
+```sh
+npm run docker:deploy
+```
+
+- Note that currently it's being pushed onto my registry at `hn275/ecss-locker`. To whom might
+  be dealing with deployment in the future, you will need to modify the
+  [docker-compose.yml](./docker-compose.yml) file accordingly, as well as the `docker:deploy`
+  npm script in [package.json](./package.json).
+
+### Database migration
+
+The [schema.sql](./db/schema.sql) file now contains the code queries to create the table and to seed
+all the lockers.
+
+### Deploying with Docker
+
+Copy the `./deploy/` directory and the `./docker-compose.yml` file onto VM/cloud instance.
+
+On your cloud instance, start the docker in daemon mode (you may have to run it with `sudo` if your
+user is not in the docker group):
+
+```sh
+docker compose up -d
+```
+
+Migrate the database with the script in `./deploy/migratedb.sh`.\
+**NOTE:** this wipes the database clean before applying the database schema.
+
+```sh
+sh ./deploy/migratedb.sh
+```
+
 ## Design
 
 This website was designed for maximum usability on mobile devices with unstable or slow internet. Excluding admin functionality, the entire website has a mobile-first layout and works without JavaScript. JavaScript is used to progressively enhance the experience with features such as loading states and a client-side router.

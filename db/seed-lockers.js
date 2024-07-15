@@ -1,8 +1,8 @@
 import { Kysely } from "kysely";
-import { PlanetScaleDialect } from "kysely-planetscale";
+import { LibsqlDialect } from "@libsql/kysely-libsql";
 
 export const db = new Kysely({
-  dialect: new PlanetScaleDialect({
+  dialect: new LibsqlDialect({
     url: process.env.DATABASE_URL,
   }),
 });

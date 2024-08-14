@@ -1,0 +1,16 @@
+<main 
+    hx-get="/api/token?token={{ .Token }}"
+    hx-trigger="load"
+    hx-replace-url="true"
+    class="flex flex-col justify-center items-center max-w-screen-md mx-auto h-[100vh] gap-5">
+
+    <img class="w-56" src="/assets/imgs/ess_ring_orange_trans.png" alt="UVic ESS Logo" />
+
+    <h1 class="text-3xl font-bold">Locker Registration</h1>
+
+    <div class="flex flex-col justify-center items-center gap-3">
+        <span class="loading loading-spinner text-primary loading-lg"></span>
+        <span>Validating token...</span>
+    </div>
+
+</main>

@@ -1,0 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+form .form-error {
+    @apply text-red-500;
+}
+
+main {
+    @apply mx-auto max-w-screen-md;
+}

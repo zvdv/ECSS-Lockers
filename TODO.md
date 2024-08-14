@@ -1,2 +1,0 @@
-- [ ] Link to Director of IT email in `./src/routes/+error.svelte`
-- [ ] GMail app password

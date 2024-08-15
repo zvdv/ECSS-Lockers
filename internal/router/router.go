@@ -25,7 +25,7 @@ func New() *App {
 	app.router.Handle("/assets/*", http.StripPrefix("/assets/", http.FileServer(http.Dir("assets"))))
 	app.router.Handle("/", http.HandlerFunc(app.index))
 	app.router.Handle("/api/login", http.HandlerFunc(app.login))
-	app.router.Handle("/validate", http.HandlerFunc(app.tokenValidator))
+	app.router.Handle("/token", http.HandlerFunc(app.tokenValidator))
 	app.router.Handle("/api/token", http.HandlerFunc(app.apiTokenValidator))
 
 	// TODO: middleware to validate cookie here

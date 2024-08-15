@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	_ "github.com/zvdv/ECSS-Lockers/internal"
 	"github.com/zvdv/ECSS-Lockers/internal/router"
 )
 

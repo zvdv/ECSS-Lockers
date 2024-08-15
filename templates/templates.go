@@ -14,7 +14,7 @@ const htmlBase string = `
         <meta charset="UTF-8">
         <link rel="stylesheet" type="text/css" href="assets/css/index.css" />
         <script src="assets/js/htmx.min.js" defer></script>
-        <title></title>
+        <title>ECSS' Locker Registration</title>
     </head>
 
     <body>

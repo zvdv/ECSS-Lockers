@@ -17,13 +17,13 @@ func TestFormValidate(t *testing.T) {
 		}
 	}
 
-	invalidEmail := []string{
-		"foobar@uvic.c",
-		"Goobarba123z@uvic.a",
-		"Goobarba_123z@gmail.ca",
+	invalidEmails := []string{
+		"foobar@uvic.caa",
+		"Goobarba123z@uvic.com",
+		"Goobarba_123z@gmail.uk",
 	}
 
-	for _, email := range invalidEmail {
+	for _, email := range invalidEmails {
 		if uvicEmailValidator(email) {
 			t.Fail()
 		}

@@ -32,7 +32,10 @@ func (router *App) login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// validate email
+	// TODO: may not have to do this? since the incoming email is forced
+	// to be @uvic.ca
 	email := r.FormValue("email")
+	email += "@uvic.ca" // append @uvic since the input data is just netlink id
 	if !uvicEmailValidator(email) {
 		data := `
             <button type="submit" class="btn btn-primary btn-block">Login</button>
@@ -58,15 +61,15 @@ func sendLoginLink(email string) error {
 	// (900 seconds) this check is done on the receiving end.
 	// + len(email)
 	buf := make([]byte, len(email)+8)
-	ts := time.Now().Unix()
-	binary.BigEndian.AppendUint64(buf[:8], uint64(ts))
+	binary.BigEndian.AppendUint64(buf[:8], uint64(time.Now().Unix()))
 	copy(buf[8:], email)
-	var key [32]byte
+	var key [32]byte // TODO: pull this from env CIPHER_KEY
 
 	ciphertext, err := crypto.Encrypt(key[:], buf, nil)
 	if err != nil {
 		return err
 	}
+
 	token := crypto.Base64Encode.EncodeToString(ciphertext)
 	return internal.SendMail(email, token)
 }

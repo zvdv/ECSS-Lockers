@@ -30,7 +30,7 @@ const htmlBase string = `
 </html>
     `
 
-func Html(writer io.Writer, t *template.Template, data any) error {
+func Base(writer io.Writer, t *template.Template, data any) error {
 	buf := bytes.NewBuffer(nil)
 	if err := t.Execute(buf, data); err != nil {
 		return err
@@ -38,5 +38,22 @@ func Html(writer io.Writer, t *template.Template, data any) error {
 
 	html := fmt.Sprintf(htmlBase, buf.String())
 	_, err := writer.Write([]byte(html))
+	return err
+}
+
+func Html(writer io.Writer, fileName string, data any) error {
+	var err error
+	tmpl, err := template.ParseFiles(fileName)
+	if err != nil {
+		return err
+	}
+
+	buf := bytes.NewBuffer(nil)
+	if err := tmpl.Execute(buf, data); err != nil {
+		return err
+	}
+
+	html := fmt.Sprintf(htmlBase, buf.String())
+	_, err = writer.Write([]byte(html))
 	return err
 }

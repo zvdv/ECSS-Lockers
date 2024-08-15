@@ -38,7 +38,9 @@ func New() *App {
 
 func writeResponse(w http.ResponseWriter, status int, writeData []byte) {
 	w.WriteHeader(status)
-	if _, err := w.Write(writeData); err != nil {
-        logger.Error("failed to write response: %s", err)
+	if writeData != nil {
+		if _, err := w.Write(writeData); err != nil {
+			logger.Error("failed to write response: %s", err)
+		}
 	}
 }

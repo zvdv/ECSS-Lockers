@@ -1,10 +1,9 @@
 package router
 
 import (
-	"html/template"
-	"log"
 	"net/http"
 
+	"github.com/zvdv/ECSS-Lockers/internal/logger"
 	"github.com/zvdv/ECSS-Lockers/templates"
 )
 
@@ -14,18 +13,13 @@ func (router *App) tokenValidator(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tmpl, err := template.ParseFiles("templates/validate.html")
-	if err != nil {
-		panic(err)
-	}
-
 	var data = struct {
 		Token string
 	}{
 		Token: r.URL.Query().Get("token"),
 	}
 
-	if err := templates.Html(w, tmpl, data); err != nil {
+	if err := templates.Html(w, "templates/validate.html", data); err != nil {
 		writeResponse(w, http.StatusInternalServerError, []byte(err.Error()))
 	}
 }
@@ -37,7 +31,7 @@ func (router *App) apiTokenValidator(w http.ResponseWriter, r *http.Request) {
 	}
 
 	token := r.URL.Query().Get("token")
-	log.Println("token:", token)
+	logger.Trace("token:%s", token)
 
 	w.Header().Add("HX-Redirect", "/dash")
 }

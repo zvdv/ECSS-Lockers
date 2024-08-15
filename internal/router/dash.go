@@ -1,9 +1,9 @@
 package router
 
 import (
-	"html/template"
 	"net/http"
 
+	"github.com/zvdv/ECSS-Lockers/internal/logger"
 	"github.com/zvdv/ECSS-Lockers/templates"
 )
 
@@ -17,16 +17,14 @@ func (router *App) dash(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tmpl, err := template.ParseFiles("templates/dash.html")
-	if err != nil {
-		panic(err)
-	}
-
 	data := dashData{
 		Terms: []string{"202409", "202501"},
 	}
 
-	templates.Html(w, tmpl, data)
+	if err := templates.Html(w, "templates/dash.html", data); err != nil {
+		logger.Error(err.Error())
+		writeResponse(w, http.StatusInternalServerError, nil)
+	}
 }
 
 func (router *App) apiDashTerm(w http.ResponseWriter, r *http.Request) {
@@ -36,5 +34,5 @@ func (router *App) apiDashTerm(w http.ResponseWriter, r *http.Request) {
 	}
 
 	term := r.URL.Query().Get("term")
-	w.Write([]byte(term))
+	writeResponse(w, http.StatusOK, []byte(term))
 }

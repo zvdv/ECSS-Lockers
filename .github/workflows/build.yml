@@ -4,7 +4,7 @@ name: CI
 
 jobs:
   build:
-    name: Test and build Go binary for Locker Registration
+    name: Test, build, and format checker
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -15,3 +15,5 @@ jobs:
         run: go test ./...
       - name: Build
         run: go build main.go
+      - name: Format
+        run: go fmt ./... ; diff=$(git diff --compact-summary --exit-code) ; [[ -z diff ]] || (echo "format your code with `go fmt ./...`." ; exit 1)

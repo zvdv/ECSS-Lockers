@@ -8,7 +8,7 @@ import (
 )
 
 var (
-    Base64Encode = base64.RawStdEncoding
+	Base64Encode = base64.RawStdEncoding
 )
 
 // key length 32 bytes

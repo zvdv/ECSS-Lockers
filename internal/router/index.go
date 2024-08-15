@@ -4,6 +4,7 @@ import (
 	"html/template"
 	"net/http"
 
+	"github.com/zvdv/ECSS-Lockers/internal/logger"
 	"github.com/zvdv/ECSS-Lockers/templates"
 )
 
@@ -12,5 +13,9 @@ func (router *App) index(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
-	templates.Base(w, loginTmpl, nil)
+
+	if err := templates.Html(w, loginTmpl, nil); err != nil {
+		logger.Error(err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+	}
 }

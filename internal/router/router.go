@@ -5,6 +5,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/zvdv/ECSS-Lockers/internal/logger"
 )
 
 type App struct {
@@ -33,4 +34,11 @@ func New() *App {
 	app.router.Handle("/api/dash/term", http.HandlerFunc(app.apiDashTerm))
 
 	return app
+}
+
+func writeResponse(w http.ResponseWriter, status int, writeData []byte) {
+	w.WriteHeader(status)
+	if _, err := w.Write(writeData); err != nil {
+        logger.Error("failed to write response: %s", err)
+	}
 }

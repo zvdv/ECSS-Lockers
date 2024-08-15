@@ -25,7 +25,9 @@ func (router *App) tokenValidator(w http.ResponseWriter, r *http.Request) {
 		Token: r.URL.Query().Get("token"),
 	}
 
-	templates.Base(w, tmpl, data)
+	if err := templates.Html(w, tmpl, data); err != nil {
+		writeResponse(w, http.StatusInternalServerError, []byte(err.Error()))
+	}
 }
 
 func (router *App) apiTokenValidator(w http.ResponseWriter, r *http.Request) {

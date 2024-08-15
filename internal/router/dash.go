@@ -26,7 +26,7 @@ func (router *App) dash(w http.ResponseWriter, r *http.Request) {
 		Terms: []string{"202409", "202501"},
 	}
 
-	templates.Base(w, tmpl, data)
+	templates.Html(w, tmpl, data)
 }
 
 func (router *App) apiDashTerm(w http.ResponseWriter, r *http.Request) {

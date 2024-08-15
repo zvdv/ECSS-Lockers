@@ -7,13 +7,7 @@ import (
 	"io"
 )
 
-func Base(writer io.Writer, t *template.Template, data any) error {
-	buf := bytes.NewBuffer(nil)
-	if err := t.Execute(buf, data); err != nil {
-		return err
-	}
-
-	htmlString := fmt.Sprintf(`
+const htmlBase string = `
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -24,7 +18,8 @@ func Base(writer io.Writer, t *template.Template, data any) error {
     </head>
 
     <body>
-        %s
+        <!-- template goes in here -->
+        %s 
     </body>
 
     <footer class="fixed bottom-0 flex justify-center items-center w-full p-5">
@@ -33,8 +28,15 @@ func Base(writer io.Writer, t *template.Template, data any) error {
         </span>
     </footer>
 </html>
-    `, buf.String())
+    `
 
-	_, err := writer.Write([]byte(htmlString))
+func Html(writer io.Writer, t *template.Template, data any) error {
+	buf := bytes.NewBuffer(nil)
+	if err := t.Execute(buf, data); err != nil {
+		return err
+	}
+
+	html := fmt.Sprintf(htmlBase, buf.String())
+	_, err := writer.Write([]byte(html))
 	return err
 }

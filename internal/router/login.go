@@ -27,23 +27,21 @@ func (router *App) login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := r.ParseForm(); err != nil {
-		panic(err)
+		writeResponse(w, http.StatusBadRequest, []byte("invalid form data"))
+		return
 	}
 
 	// validate email
 	email := r.FormValue("email")
 	if !uvicEmailValidator(email) {
-		_, err := w.Write([]byte(`
+		data := `
             <button type="submit" class="btn btn-primary btn-block">Login</button>
             <div class="form-error">Invalid UVic email address</div>
-            `))
-		if err != nil {
-			panic(err)
-		}
+            `
+		writeResponse(w, http.StatusOK, []byte(data))
 		return
 	}
 
-	// TODO: send email
 	if err := sendLoginLink(email); err != nil {
 		panic(err)
 	}
@@ -52,9 +50,7 @@ func (router *App) login(w http.ResponseWriter, r *http.Request) {
 	html := fmt.Sprintf(`<span class="form-info">
         Login link sent to %s!
         </span>`, email)
-	if _, err := w.Write([]byte(html)); err != nil {
-		panic(err)
-	}
+	writeResponse(w, http.StatusOK, []byte(html))
 }
 
 func sendLoginLink(email string) error {

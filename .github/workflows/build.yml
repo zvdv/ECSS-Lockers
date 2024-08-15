@@ -16,4 +16,8 @@ jobs:
       - name: Build
         run: go build main.go
       - name: Format
-        run: go fmt ./... ; diff=$(git diff --compact-summary --exit-code) ; [[ -z diff ]] || (echo "format your code with `go fmt ./...`." ; exit 1)
+        run: go fmt ./...
+      - name: Diff check
+        run: |
+          git diff --compact-summary --exit-code || \
+          (echo ; echo "Reformat your code with \"go fmt ./...\"" ; exit 1)

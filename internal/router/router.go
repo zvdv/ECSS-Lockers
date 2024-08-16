@@ -2,6 +2,7 @@ package router
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -20,7 +21,8 @@ func (app *App) Router() *chi.Mux {
 func New() *App {
 	app := &App{chi.NewRouter()}
 
-	app.router.Use(middleware.Logger)
+	app.router.Use(middleware.RealIP)
+	app.router.Use(requestLogger)
 	app.router.Use(middleware.Recoverer)
 
 	app.router.Handle("/assets/*", http.StripPrefix("/assets/", http.FileServer(http.Dir("assets"))))
@@ -43,4 +45,23 @@ func writeResponse(w http.ResponseWriter, status int, writeData []byte) {
 			logger.Error("failed to write response: %s", err)
 		}
 	}
+}
+
+func requestLogger(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ww := middleware.NewWrapResponseWriter(w, r.ProtoMajor)
+
+		start := time.Now()
+		next.ServeHTTP(ww, r)
+		end := time.Since(start)
+
+		logger.Trace("%s %s %s from %s - %d %dB in %v",
+			r.Method,
+			r.URL.String(),
+			r.Proto,
+			r.RemoteAddr,
+			ww.Status(),
+			ww.BytesWritten(),
+			end)
+	})
 }

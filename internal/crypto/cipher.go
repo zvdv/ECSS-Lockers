@@ -2,13 +2,8 @@ package crypto
 
 import (
 	"crypto/rand"
-	"encoding/base64"
 
 	"golang.org/x/crypto/chacha20poly1305"
-)
-
-var (
-	Base64Encode = base64.RawStdEncoding
 )
 
 // key length 32 bytes

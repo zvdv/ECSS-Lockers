@@ -1,15 +1,12 @@
 package router
 
 import (
-	"encoding/binary"
 	"fmt"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/zvdv/ECSS-Lockers/internal"
-	"github.com/zvdv/ECSS-Lockers/internal/crypto"
 )
 
 func uvicEmailValidator(email string) bool {
@@ -45,7 +42,12 @@ func (router *App) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := sendLoginLink(email); err != nil {
+	tok, err := makeTokenFromEmail(email)
+	if err != nil {
+		panic(err)
+	}
+
+	if err := internal.SendMail(email, tok); err != nil {
 		panic(err)
 	}
 
@@ -54,22 +56,4 @@ func (router *App) login(w http.ResponseWriter, r *http.Request) {
         Login link sent to %s!
         </span>`, email)
 	writeResponse(w, http.StatusOK, []byte(html))
-}
-
-func sendLoginLink(email string) error {
-	// block schema: 8 byte timestamp, seconds in UTC, expires in 15 mins
-	// (900 seconds) this check is done on the receiving end.
-	// + len(email)
-	buf := make([]byte, len(email)+8)
-	binary.BigEndian.AppendUint64(buf[:8], uint64(time.Now().Unix()))
-	copy(buf[8:], email)
-	var key [32]byte // TODO: pull this from env CIPHER_KEY
-
-	ciphertext, err := crypto.Encrypt(key[:], buf, nil)
-	if err != nil {
-		return err
-	}
-
-	token := crypto.Base64Encode.EncodeToString(ciphertext)
-	return internal.SendMail(email, token)
 }

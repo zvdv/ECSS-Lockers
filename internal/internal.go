@@ -1,36 +1,44 @@
 package internal
 
 import (
-	"log"
 	"os"
 
 	"github.com/joho/godotenv"
+	"github.com/zvdv/ECSS-Lockers/internal/logger"
 )
 
 var (
-	hostemail    string
-	hostpassword string
-	mailserver   string
-	mailport     int
-	domain       string
+	Env struct {
+		HostEmail    string
+		HostPassword string
+		MailServer   string
+		MailPort     int
+		Domain       string
+		CipherKey    []byte
+	}
 )
 
 func init() {
 	if err := godotenv.Load(); err != nil {
-		log.Printf("[WARN] .env file not found\n")
+		logger.Warn("failed to load .env")
 	}
 
-	hostemail = envOrPanic("GMAIL_USER")
-	hostpassword = envOrPanic("GMAIL_PASSWORD")
-	mailserver = "smtp.gmail.com"
-	mailport = 587
-	domain = envOrPanic("ORIGIN")
+	Env.HostEmail = EnvOrPanic("GMAIL_USER")
+	Env.HostPassword = EnvOrPanic("GMAIL_PASSWORD")
+	Env.MailServer = "smtp.gmail.com"
+	Env.MailPort = 587
+	Env.Domain = EnvOrPanic("ORIGIN")
+	Env.CipherKey = []byte(EnvOrPanic("CIPHER_KEY"))
+	if len(Env.CipherKey) != 32 {
+		logger.Warn("invalid value set for env $CIPHER_KEY, expected length of 32 bytes, got %d byte(s)",
+			len(Env.CipherKey))
+	}
 }
 
-func envOrPanic(key string) string {
+func EnvOrPanic(key string) string {
 	value := os.Getenv(key)
 	if len(value) == 0 {
-		log.Printf("[WARN] env variable not set: %s \n", key)
+		logger.Warn("env variable not set: $%s", key)
 	}
 	return value
 }

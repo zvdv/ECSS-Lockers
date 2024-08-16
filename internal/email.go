@@ -7,9 +7,9 @@ import (
 )
 
 func SendMail(email string, token string) error {
-	d := gomail.NewDialer(mailserver, mailport, hostemail, hostpassword)
+	d := gomail.NewDialer(Env.MailServer, Env.MailPort, Env.HostEmail, Env.HostPassword)
 	msg := gomail.NewMessage()
-	msg.SetHeader("From", hostemail)
+	msg.SetHeader("From", Env.HostEmail)
 	msg.SetHeader("To", email)
 	msg.SetHeader("Subject", "Locker registration")
 	msg.SetBody("text/html", fmt.Sprintf(`
@@ -31,7 +31,7 @@ Best regards,
 <br />
 The Locker Team
 <br />
-        `, domain, token, hostemail))
+        `, Env.Domain, token, Env.HostEmail))
 
 	return d.DialAndSend(msg)
 }

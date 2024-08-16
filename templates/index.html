@@ -8,6 +8,7 @@
         hx-trigger="submit"
         hx-swap="innerHTML"
         hx-target="#output"
+        hx-disabled-elt="find button[type='submit'], find input[type='text']"
         class="flex flex-col gap-4 justify-center items-center">
 
         <div>
@@ -33,8 +34,9 @@
 
         </div>
 
-        <div id="output" class="w-full flex justify-center items-center">
-            <button type="submit" class="btn btn-primary btn-block">Login</button>
+        <div id="output" class="w-full flex flex-col gap-3 justify-center items-center">
+            <button type="submit" 
+                class="btn btn-primary btn-block">Login</button>
         </div>
 
     </form>

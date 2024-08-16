@@ -7,6 +7,8 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/zvdv/ECSS-Lockers/internal"
+	"github.com/zvdv/ECSS-Lockers/internal/email"
+	"gopkg.in/gomail.v2"
 )
 
 func uvicEmailValidator(email string) bool {
@@ -28,12 +30,12 @@ func (router *App) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// validate email
-	// TODO: may not have to do this? since the incoming email is forced
+	// validate userEmail
+	// TODO: may not have to do this? since the incoming userEmail is forced
 	// to be @uvic.ca
-	email := r.FormValue("email")
-	email += "@uvic.ca" // append @uvic since the input data is just netlink id
-	if !uvicEmailValidator(email) {
+	userEmail := r.FormValue("email")
+	userEmail += "@uvic.ca" // append @uvic since the input data is just netlink id
+	if !uvicEmailValidator(userEmail) {
 		data := `
             <button type="submit" class="btn btn-primary btn-block">Login</button>
             <div class="form-error">Invalid UVic email address</div>
@@ -42,18 +44,46 @@ func (router *App) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tok, err := makeTokenFromEmail(email)
+	tok, err := makeTokenFromEmail(userEmail)
 	if err != nil {
 		panic(err)
 	}
 
-	if err := internal.SendMail(email, tok); err != nil {
+	msg := gomail.NewMessage()
+	// msg.SetHeader("From", internal.Env.HostEmail)
+	msg.SetHeader("To", userEmail)
+	msg.SetHeader("Subject", "Locker registration")
+	msg.SetBody("text/html", fmt.Sprintf(emailtemplate,
+		internal.Env.Domain,
+		tok,
+		internal.Env.HostEmail))
+
+	if err := email.Send(msg); err != nil {
 		panic(err)
 	}
 
 	// response
 	html := fmt.Sprintf(`<span class="form-info">
         Login link sent to %s!
-        </span>`, email)
+        </span>`, userEmail)
 	writeResponse(w, http.StatusOK, []byte(html))
 }
+
+const emailtemplate string = `Hello!
+<br />
+<br />
+You recently requested to sign in to Locker Registration. Click the link below to access your account:
+<br />
+<br />
+<a href="%s/token?token=%s">Sign In to Locker</a>
+<br />
+<br />
+This link will expire in 15 minutes. If you did not request this sign-in, please ignore this email.
+<br />
+If you need any help, our support team is here for you at <a href="mailto:%s">support</a>.
+<br />
+<br />
+Best regards,
+<br />
+The Locker Team
+<br />`

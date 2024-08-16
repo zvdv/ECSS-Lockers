@@ -8,8 +8,8 @@ import (
 )
 
 func (router *App) index(w http.ResponseWriter, r *http.Request) {
-    // cache for 15 mins
-	w.Header().Add("Cache-Control", "max-age=900") 
+	// cache for 15 mins
+	w.Header().Add("Cache-Control", "max-age=900")
 	w.WriteHeader(http.StatusOK)
 	if err := templates.Html(w, "templates/index.html", nil); err != nil {
 		logger.Error(err.Error())

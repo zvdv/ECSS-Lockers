@@ -89,7 +89,7 @@ func makeTokenFromEmail(email string) (string, error) {
 	return hex.EncodeToString(ciphertext), nil
 }
 
-// returns email, token created time, parsed from hex-string encoded `token` 
+// returns email, token created time, parsed from hex-string encoded `token`
 func parseToken(token string) (string, uint64, error) {
 	decodedTokenBytes, err := hex.DecodeString(token)
 	if err != nil {

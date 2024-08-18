@@ -9,20 +9,59 @@
 
 <main class="px-10">
   {{if .HasData}}
+
   <div>
     <h1>Registrations info</h1>
 
     <h2>{{.Locker}}</h2>
     <h2>{{.UserName}}</h2>
   </div>
+
   {{else}}
 
   <section class="flex flex-col gap-3 justify-start items-center">
+    <p>You are currently not registered for any lockers yet.</p>
+
     <h2>Select a locker:</h2>
+
+    <form hx-put="/api/dash/register" class="p-3 shadow rounded-lg w-max">
+      <ul class="max-h-[60vh] overflow-y-scroll p-5 w-max mb-5">
+        <input type="text" class="input input-bordered" placeholder="Search" />
+
+        {{range $locker := .Lockers}}
+
+        <li class="form-control">
+          <label class="label cursor-pointer">
+            {{if $locker.InUse}}
+            <input
+              type="radio"
+              name="locker"
+              class="radio checked:radio-primary"
+              value="{{$locker.ID}}"
+              disabled
+            />
+
+            {{else}}
+
+            <input
+              type="radio"
+              name="locker"
+              class="radio checked:radio-primary"
+              value="{{$locker.ID}}"
+            />
+
+            {{end}}
+
+            <span class="label-text ml-5">{{$locker.ID}}</span>
+          </label>
+        </li>
+
+        {{end}}
+      </ul>
+
+      <button type="submit" class="btn btn-primary btn-block">Submit</button>
+    </form>
   </section>
 
-  <div>No locker signup</div>
   {{end}}
-
-  <section id="term-data"></section>
 </main>

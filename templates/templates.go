@@ -12,6 +12,7 @@ const htmlBase string = `
 <html lang="en">
     <head>
         <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1.0" />
         <link rel="stylesheet" type="text/css" href="assets/css/index.css" />
         <script src="assets/js/htmx.min.js" defer></script>
         <title>ECSS' Locker Registration</title>

@@ -14,10 +14,15 @@ type dashData struct {
 	HasData  bool
 	UserName string
 	Locker   string
+	Lockers  []lockerState
+}
+
+type lockerState struct {
+	ID    string
+	InUse bool
 }
 
 func dash(w http.ResponseWriter, r *http.Request) {
-	logger.Trace("HLKDSFLKJ")
 	if r.Method != http.MethodGet {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
@@ -37,18 +42,32 @@ func dash(w http.ResponseWriter, r *http.Request) {
 		HasData:  false,
 		UserName: "",
 		Locker:   "",
+		Lockers:  []lockerState{},
 	}
 
 	err := db.QueryRow(
-		"SELECT locker, name FROM registration WHERE user = :email LIMIT 1;",
+		`SELECT locker, name FROM registration WHERE user = :email LIMIT 1;`,
 		sql.Named("email", email)).Scan(&data.Locker, &data.UserName)
 	if err != nil {
 		if !errors.Is(err, sql.ErrNoRows) {
-            panic(err)
-		} 
-	}else {
-        data.HasData = true
-    }
+			panic(err)
+		}
+	} else {
+		data.HasData = true
+		if err := templates.Html(w, "templates/dash.html", data); err != nil {
+			logger.Error(err.Error())
+			writeResponse(w, http.StatusInternalServerError, nil)
+		}
+		return
+	}
+
+	// query for all lockers
+	rows, err := db.Query("SELECT id FROM locker;")
+	for rows.Next() {
+		var locker string
+		rows.Scan(&locker)
+		data.Lockers = append(data.Lockers, lockerState{locker, false})
+	}
 
 	if err := templates.Html(w, "templates/dash.html", data); err != nil {
 		logger.Error(err.Error())

@@ -5,7 +5,6 @@ import (
 	"sync"
 
 	_ "github.com/tursodatabase/libsql-client-go/libsql"
-	"github.com/zvdv/ECSS-Lockers/internal"
 )
 
 var (
@@ -13,14 +12,14 @@ var (
 	dbLock *sync.Mutex
 )
 
-func Initialize() error {
+func Initialize(dbUrl string) error {
 	dbLock = new(sync.Mutex)
 	var err error
-	db, err = sql.Open("libsql", internal.Env.DatabaseURL)
+	db, err = sql.Open("libsql", dbUrl)
 	return err
 }
 
 func Lock() (*sql.DB, *sync.Mutex) {
-    dbLock.Lock()
+	dbLock.Lock()
 	return db, dbLock
 }

@@ -46,9 +46,11 @@ func requestLogger(next http.Handler) http.Handler {
 		next.ServeHTTP(ww, r)
 		end := time.Since(start)
 
+		url := r.URL.Path
+
 		logger.Trace("%s %s %s from %s - %d %dB in %v",
 			r.Method,
-			r.URL.String(),
+			url,
 			r.Proto,
 			r.RemoteAddr,
 			ww.Status(),

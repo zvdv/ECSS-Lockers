@@ -1,26 +1,28 @@
 <nav class="flex justify-start items-center gap-3 p-5">
-    <img class="w-10" src="/assets/imgs/ess_ring_orange_trans.png" alt="UVic ESS Logo" />
-    <h1 class="text-xl font-semibold">Locker registrations</h1>
+  <img
+    class="w-10"
+    src="/assets/imgs/ess_ring_orange_trans.png"
+    alt="UVic ESS Logo"
+  />
+  <h1 class="text-xl font-semibold">Locker registrations</h1>
 </nav>
 
 <main class="px-10">
-    <form 
-        hx-get="/api/dash/term"
-        hx-trigger="change"
-        hx-target="#term-data"
-        hx-swap="innerHTML"
-        class="flex flex-col">
-        <label for="terms">Term:</label>
-        <select 
-            name="term"
-            id="terms"
-            class="select select-bordered max-w-xs w-max">
-            <option disabled selected>Select a term:</option>
-            {{range $term := .Terms}}
-            <option value="{{$term}}">{{$term}}</option>
-            {{end}}
-        </select>
-    </form>
+  {{if .HasData}}
+  <div>
+    <h1>Registrations info</h1>
 
-    <section id="term-data"></section>
+    <h2>{{.Locker}}</h2>
+    <h2>{{.UserName}}</h2>
+  </div>
+  {{else}}
+
+  <section class="flex flex-col gap-3 justify-start items-center">
+    <h2>Select a locker:</h2>
+  </section>
+
+  <div>No locker signup</div>
+  {{end}}
+
+  <section id="term-data"></section>
 </main>

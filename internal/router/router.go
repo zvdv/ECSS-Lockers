@@ -1,11 +1,16 @@
 package router
 
 import (
+	"context"
+	"encoding/hex"
 	"net/http"
 	"time"
 
+	"github.com/fatih/color"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/zvdv/ECSS-Lockers/internal"
+	"github.com/zvdv/ECSS-Lockers/internal/crypto"
 	"github.com/zvdv/ECSS-Lockers/internal/logger"
 )
 
@@ -23,10 +28,38 @@ func New() *chi.Mux {
 	app.Handle("/api/token", http.HandlerFunc(apiTokenValidator))
 
 	// TODO: Middleware to validate cookie here
-	app.Handle("/dash", http.HandlerFunc(dash))
-	app.Handle("/api/dash/term", http.HandlerFunc(apiDashTerm))
+	app.Route("/dash", func(r chi.Router) {
+		r.Use(authenticatedUserOnly)
+		r.Handle("/", http.HandlerFunc(dash))
+		r.Handle("/api/term", http.HandlerFunc(apiDashTerm))
+	})
 
 	return app
+}
+
+func authenticatedUserOnly(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		cookie, err := r.Cookie("session")
+		if err != nil {
+			logger.Error("Session cookie not set %v", err)
+			writeResponse(w, http.StatusForbidden, nil)
+			return
+		}
+
+		sessionID, err := hex.DecodeString(cookie.Value)
+		if err != nil {
+			logger.Fatal("invalid session id: %v", err)
+		}
+		email, err := crypto.Decrypt(internal.Env.CipherKey, sessionID, nil)
+		if err != nil {
+			logger.Fatal("invalid decryption: %v", err)
+		}
+
+		logger.Info("%s", string(email))
+
+		ctx := context.WithValue(r.Context(), "user_email", string(email))
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
 }
 
 func writeResponse(w http.ResponseWriter, status int, writeData []byte) {
@@ -48,12 +81,18 @@ func requestLogger(next http.Handler) http.Handler {
 
 		url := r.URL.Path
 
-		logger.Trace("%s %s %s from %s - %d %dB in %v",
+		statusCode := ww.Status()
+		statusString := color.GreenString("%d", statusCode)
+		if statusCode >= 400 {
+			statusString = color.RedString("%d", statusCode)
+		}
+
+		logger.Trace("%s %s %s from %s - %s %dB in %v",
 			r.Method,
 			url,
 			r.Proto,
 			r.RemoteAddr,
-			ww.Status(),
+			statusString,
 			ww.BytesWritten(),
 			end)
 	})

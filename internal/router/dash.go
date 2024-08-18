@@ -11,7 +11,7 @@ type dashData struct {
 	Terms []string
 }
 
-func (router *App) dash(w http.ResponseWriter, r *http.Request) {
+func  dash(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
@@ -27,7 +27,7 @@ func (router *App) dash(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (router *App) apiDashTerm(w http.ResponseWriter, r *http.Request) {
+func  apiDashTerm(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return

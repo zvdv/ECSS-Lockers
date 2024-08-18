@@ -9,31 +9,22 @@ import (
 	"github.com/zvdv/ECSS-Lockers/internal/logger"
 )
 
-type App struct {
-	router *chi.Mux
-	// TODO: App state
-}
+func New() *chi.Mux {
+	app := chi.NewRouter()
 
-func (app *App) Router() *chi.Mux {
-	return app.router
-}
+	app.Use(middleware.RealIP)
+	app.Use(requestLogger)
+	app.Use(middleware.Recoverer)
 
-func New() *App {
-	app := &App{chi.NewRouter()}
+	app.Handle("/assets/*", http.StripPrefix("/assets/", http.FileServer(http.Dir("assets"))))
+	app.Handle("/", http.HandlerFunc(index))
+	app.Handle("/api/login", http.HandlerFunc(login))
+	app.Handle("/token", http.HandlerFunc(tokenValidator))
+	app.Handle("/api/token", http.HandlerFunc(apiTokenValidator))
 
-	app.router.Use(middleware.RealIP)
-	app.router.Use(requestLogger)
-	app.router.Use(middleware.Recoverer)
-
-	app.router.Handle("/assets/*", http.StripPrefix("/assets/", http.FileServer(http.Dir("assets"))))
-	app.router.Handle("/", http.HandlerFunc(app.index))
-	app.router.Handle("/api/login", http.HandlerFunc(app.login))
-	app.router.Handle("/token", http.HandlerFunc(app.tokenValidator))
-	app.router.Handle("/api/token", http.HandlerFunc(app.apiTokenValidator))
-
-	// TODO: middleware to validate cookie here
-	app.router.Handle("/dash", http.HandlerFunc(app.dash))
-	app.router.Handle("/api/dash/term", http.HandlerFunc(app.apiDashTerm))
+	// TODO: Middleware to validate cookie here
+	app.Handle("/dash", http.HandlerFunc(dash))
+	app.Handle("/api/dash/term", http.HandlerFunc(apiDashTerm))
 
 	return app
 }

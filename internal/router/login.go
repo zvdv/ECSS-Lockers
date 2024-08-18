@@ -19,7 +19,7 @@ func uvicEmailValidator(email string) bool {
 	return false
 }
 
-func (router *App) login(w http.ResponseWriter, r *http.Request) {
+func  login(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return

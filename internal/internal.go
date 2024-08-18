@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -15,6 +16,7 @@ var (
 		MailPort     int
 		Domain       string
 		CipherKey    []byte
+		DatabaseURL  string
 	}
 )
 
@@ -33,6 +35,10 @@ func init() {
 		logger.Warn("invalid value set for env $CIPHER_KEY, expected length of 32 bytes, got %d byte(s)",
 			len(Env.CipherKey))
 	}
+
+	Env.DatabaseURL = fmt.Sprintf("%s?authToken=%s",
+		EnvOrPanic("TURSO_DATABASE_URL"),
+		EnvOrPanic("TURSO_AUTH_TOKEN"))
 }
 
 func EnvOrPanic(key string) string {

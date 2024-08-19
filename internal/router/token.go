@@ -8,10 +8,11 @@ import (
 
 	"github.com/zvdv/ECSS-Lockers/internal"
 	"github.com/zvdv/ECSS-Lockers/internal/crypto"
+	"github.com/zvdv/ECSS-Lockers/internal/logger"
 	"github.com/zvdv/ECSS-Lockers/templates"
 )
 
-func  tokenValidator(w http.ResponseWriter, r *http.Request) {
+func tokenValidator(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
@@ -29,7 +30,7 @@ func  tokenValidator(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func  apiTokenValidator(w http.ResponseWriter, r *http.Request) {
+func apiTokenValidator(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
@@ -39,7 +40,9 @@ func  apiTokenValidator(w http.ResponseWriter, r *http.Request) {
 
 	email, ts, err := parseToken(token)
 	if err != nil {
-		panic(err)
+		logger.Error("Failed to parse token:\n%v", err)
+		writeResponse(w, http.StatusInternalServerError, nil)
+		return
 	}
 
 	// token expired?
@@ -56,11 +59,12 @@ func  apiTokenValidator(w http.ResponseWriter, r *http.Request) {
 	}
 
 	cookie := http.Cookie{
-		Name:     "session",
-		Value:    hex.EncodeToString(cookieValue),
-		Domain:   internal.Env.Domain,
-		Path:     "/",
-		MaxAge:   3600,  // good for 1 hour
+		Name:   "session",
+		Value:  crypto.Base64.EncodeToString(cookieValue),
+		Domain: internal.Env.Domain,
+		Path:   "/",
+		MaxAge: 3600, // good for 1 hour
+		// MaxAge:   999999, // for local dev
 		Secure:   false, // TODO: flip to true on prod
 		HttpOnly: false, // TODO: flip to true on prod
 	}
@@ -74,6 +78,8 @@ func  apiTokenValidator(w http.ResponseWriter, r *http.Request) {
 // block schema: 8 byte timestamp, seconds in UTC, expires in 15 mins
 // (900 seconds) this check is done on the receiving end.
 // + len(email)
+// since the token is transfered via emails as url, hex encode
+// instead of base64
 
 // returns hex-string encoded of a token
 func makeTokenFromEmail(email string) (string, error) {

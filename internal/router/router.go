@@ -12,6 +12,7 @@ import (
 	"github.com/zvdv/ECSS-Lockers/internal"
 	"github.com/zvdv/ECSS-Lockers/internal/crypto"
 	"github.com/zvdv/ECSS-Lockers/internal/logger"
+	"github.com/zvdv/ECSS-Lockers/templates"
 )
 
 func New() *chi.Mux {
@@ -41,8 +42,10 @@ func authenticatedUserOnly(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		cookie, err := r.Cookie("session")
 		if err != nil {
-			logger.Error("Session cookie not set %v", err)
-			writeResponse(w, http.StatusForbidden, nil)
+			err := templates.Html(w, "templates/session_expired.html", nil)
+			if err != nil {
+				writeResponse(w, http.StatusInternalServerError, nil)
+			}
 			return
 		}
 
@@ -50,6 +53,7 @@ func authenticatedUserOnly(next http.Handler) http.Handler {
 		if err != nil {
 			logger.Fatal("invalid session id: %v", err)
 		}
+
 		email, err := crypto.Decrypt(internal.Env.CipherKey, sessionID, nil)
 		if err != nil {
 			logger.Fatal("invalid decryption: %v", err)

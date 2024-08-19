@@ -9,7 +9,12 @@
       <p>{{$locker.LockerID}}</p>
 
       {{if $locker.IsAvailable}}
-      <button class="btn btn-sm btn-primary" value="{{$locker}}" type="submit">
+      <button
+        class="btn btn-sm btn-primary"
+        name="locker"
+        value="{{$locker.LockerID}}"
+        type="submit"
+      >
         Register
       </button>
       {{else}}

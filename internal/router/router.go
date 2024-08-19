@@ -33,6 +33,7 @@ func New() *chi.Mux {
 		r.Use(authenticatedUserOnly)
 		r.Handle("/", http.HandlerFunc(dash))
 		r.Handle("/api/locker", http.HandlerFunc(apiLocker))
+		r.Handle("/api/locker/confirm", http.HandlerFunc(apiLockerConfirm))
 	})
 
 	return app

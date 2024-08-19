@@ -146,3 +146,21 @@ func apiLocker(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 }
+
+func apiLockerConfirm(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPut {
+		writeResponse(w, http.StatusMethodNotAllowed, nil)
+		return
+	}
+
+	if err := r.ParseForm(); err != nil {
+		panic(err)
+	}
+
+	locker := r.FormValue("locker")
+	logger.Info(locker)
+
+    // TODO: calculate exp timestamp
+
+	// TODO: write to db
+}

@@ -32,7 +32,7 @@ func New() *chi.Mux {
 	app.Route("/dash", func(r chi.Router) {
 		r.Use(authenticatedUserOnly)
 		r.Handle("/", http.HandlerFunc(dash))
-		r.Handle("/api/term", http.HandlerFunc(apiDashTerm))
+		r.Handle("/api/locker", http.HandlerFunc(apiLocker))
 	})
 
 	return app

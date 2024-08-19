@@ -7,7 +7,7 @@
   <h1 class="text-xl font-semibold">Locker registrations</h1>
 </nav>
 
-<main class="px-10">
+<main class="px-10 py-10">
   {{if .HasData}}
 
   <div>
@@ -20,46 +20,18 @@
   {{else}}
 
   <section class="flex flex-col gap-3 justify-start items-center">
-    <p>You are currently not registered for any lockers yet.</p>
-
-    <h2>Select a locker:</h2>
-
+    <h2 class="text-primary text-xl">Locker registration:</h2>
     <form hx-put="/api/dash/register" class="p-3 shadow rounded-lg w-max">
-      <ul class="max-h-[60vh] overflow-y-scroll p-5 w-max mb-5">
-        <input type="text" class="input input-bordered" placeholder="Search" />
-
-        {{range $locker := .Lockers}}
-
-        <li class="form-control">
-          <label class="label cursor-pointer">
-            {{if $locker.InUse}}
-            <input
-              type="radio"
-              name="locker"
-              class="radio checked:radio-primary"
-              value="{{$locker.ID}}"
-              disabled
-            />
-
-            {{else}}
-
-            <input
-              type="radio"
-              name="locker"
-              class="radio checked:radio-primary"
-              value="{{$locker.ID}}"
-            />
-
-            {{end}}
-
-            <span class="label-text ml-5">{{$locker.ID}}</span>
-          </label>
-        </li>
-
-        {{end}}
-      </ul>
-
-      <button type="submit" class="btn btn-primary btn-block">Submit</button>
+      <label class="input input-bordered flex items-center gap-2">
+        ELW
+        <input
+          name="locker"
+          hx-put="/dash/api/locker"
+          hx-trigger="keyup changed delay:500ms"
+          type="number"
+          class="grow"
+        />
+      </label>
     </form>
   </section>
 

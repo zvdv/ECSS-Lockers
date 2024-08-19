@@ -3,6 +3,7 @@ package router
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/zvdv/ECSS-Lockers/internal/database"
@@ -75,12 +76,20 @@ func dash(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func apiDashTerm(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
+func apiLocker(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPut {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
 
-	term := r.URL.Query().Get("term")
-	writeResponse(w, http.StatusOK, []byte(term))
+	if err := r.ParseForm(); err != nil {
+		panic(err)
+	}
+
+	lockerInput := r.FormValue("locker") // TODO: sanitize this input
+	locker := fmt.Sprintf("ELW %s", lockerInput)
+
+	logger.Info("locker: %s", locker) 
+    // TODO: query database for this
+	writeResponse(w, http.StatusOK, nil)
 }

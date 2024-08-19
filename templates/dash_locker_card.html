@@ -1,0 +1,26 @@
+{{if .LockerOK}}
+<form
+  hx-put="/dash/api/locker/confirm"
+  class="max-h-[60vh] overflow-y-scroll w-full grid grid-cols-2 place-items-center gap-5"
+>
+  {{range $locker := .Lockers}}
+  <div class="card shadow-xl border p-5">
+    <div class="flex flex-col gap-3 justify-center items-center">
+      <p>{{$locker.LockerID}}</p>
+
+      {{if $locker.IsAvailable}}
+      <button class="btn btn-sm btn-primary" value="{{$locker}}" type="submit">
+        Register
+      </button>
+      {{else}}
+      <span class="italic text-sm opacity-60">Unavailable</span>
+      {{end}}
+    </div>
+  </div>
+  {{end}}
+</form>
+{{else}}
+
+<p class="text-error text-center">Locker not found!</p>
+
+{{end}}

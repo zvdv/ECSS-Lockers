@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/zvdv/ECSS-Lockers/internal/database"
 	"github.com/zvdv/ECSS-Lockers/internal/logger"
@@ -86,10 +87,62 @@ func apiLocker(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	lockerInput := r.FormValue("locker") // TODO: sanitize this input
-	locker := fmt.Sprintf("ELW %s", lockerInput)
+	lockerNum, err := strconv.ParseUint(r.FormValue("locker"), 10, 16)
+	if err != nil {
+		writeResponse(
+			w,
+			http.StatusOK,
+			[]byte("<p class=\"text-error text-center\">Invalid locker</p>"))
+		return
+	}
 
-	logger.Info("locker: %s", locker) 
-    // TODO: query database for this
-	writeResponse(w, http.StatusOK, nil)
+	db, lock := database.Lock()
+	defer lock.Unlock()
+
+	stmt, err := db.Prepare(`
+        SELECT locker.id, registration.locker FROM locker
+        LEFT JOIN registration ON locker.id = registration.locker
+        WHERE locker.id LIKE?;
+        `)
+	if err != nil {
+		logger.Fatal("stmt error", err)
+		return
+	}
+
+	locker := fmt.Sprintf("%%ELW %d%%", lockerNum)
+	rows, err := stmt.Query(locker)
+	if err != nil {
+		panic(err)
+	}
+
+	type LockerState struct {
+		IsAvailable bool
+		LockerID    string
+	}
+
+	lockers := []LockerState{}
+	for rows.Next() {
+		var (
+			lockerID       string
+			registrationID string
+		)
+
+		rows.Scan(&lockerID, &registrationID)
+		lockers = append(lockers, LockerState{
+			IsAvailable: len(registrationID) == 0,
+			LockerID:    lockerID,
+		})
+	}
+
+	data := struct {
+		LockerOK bool
+		Lockers  []LockerState
+	}{
+		LockerOK: len(lockers) != 0,
+		Lockers:  lockers,
+	}
+
+	if err := templates.Component(w, "templates/dash_locker_card.html", data); err != nil {
+		panic(err)
+	}
 }

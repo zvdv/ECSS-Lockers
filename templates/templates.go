@@ -58,3 +58,13 @@ func Html(writer io.Writer, fileName string, data any) error {
 	_, err = writer.Write([]byte(html))
 	return err
 }
+
+func Component(writer io.Writer, fileName string, data any) error {
+	var err error
+	tmpl, err := template.ParseFiles(fileName)
+	if err != nil {
+		return err
+	}
+
+    return tmpl.Execute(writer, data)
+}

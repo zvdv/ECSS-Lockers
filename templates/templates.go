@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"html/template"
-	"io"
 	"net/http"
 
 	"github.com/zvdv/ECSS-Lockers/internal/logger"
@@ -17,9 +16,9 @@ const htmlBase string = `
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-        <link rel="stylesheet" type="text/css" href="assets/css/index.css" />
-        <link rel="icon" type="image/x-icon" href="assets/favicon.png">
-        <script src="assets/js/htmx.min.js" defer></script>
+        <link rel="stylesheet" type="text/css" href="/assets/css/index.css" />
+        <link rel="icon" type="image/x-icon" href="/assets/favicon.png">
+        <script src="/assets/js/htmx.min.js" defer></script>
         <title>ECSS' Locker Registration</title>
     </head>
 
@@ -36,33 +35,23 @@ const htmlBase string = `
 </html>
     `
 
-func Base(writer io.Writer, t *template.Template, data any) error {
-	buf := bytes.NewBuffer(nil)
-	if err := t.Execute(buf, data); err != nil {
-		return err
-	}
-
-	html := fmt.Sprintf(htmlBase, buf.String())
-	_, err := writer.Write([]byte(html))
-	return err
-}
-
 func Html(w http.ResponseWriter, fileName string, data any) {
 	tmpl, err := template.ParseFiles(fileName)
 	if err != nil {
-		logger.Fatal("error reading file %s: %v", fileName, err)
 		ioutil.WriteResponse(w, http.StatusInternalServerError, nil)
+		logger.Error("error reading file %s: %v", fileName, err)
+		return
 	}
 
 	buf := bytes.NewBuffer(nil)
 	if err := tmpl.Execute(buf, data); err != nil {
-		logger.Error("error executing template data: %v", err)
 		ioutil.WriteResponse(w, http.StatusInternalServerError, nil)
+		logger.Error("error executing template data: %v", err)
 		return
 	}
 
 	html := fmt.Sprintf(htmlBase, buf.String())
-    ioutil.WriteResponse(w, http.StatusOK, []byte(html))
+	ioutil.WriteResponse(w, http.StatusOK, []byte(html))
 }
 
 func Component(writer http.ResponseWriter, fileName string, data any) {

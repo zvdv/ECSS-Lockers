@@ -8,13 +8,11 @@
 </nav>
 
 <main class="px-10 py-10">
-  {{if .HasData}}
+  {{if .HasLocker}}
 
-  <div>
-    <h1>Registrations info</h1>
-
-    <h2>{{.Locker}}</h2>
-    <h2>{{.UserName}}</h2>
+  <div class="mx-auto text-center">
+    <h1>Locker registered</h1>
+    <h2 class="text-primary text-3xl">{{.LockerName}}</h2>
   </div>
 
   {{else}}

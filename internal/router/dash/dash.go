@@ -6,23 +6,20 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"sync"
+	"time"
 
+	"github.com/zvdv/ECSS-Lockers/internal"
+	"github.com/zvdv/ECSS-Lockers/internal/crypto"
 	"github.com/zvdv/ECSS-Lockers/internal/database"
 	"github.com/zvdv/ECSS-Lockers/internal/logger"
 	"github.com/zvdv/ECSS-Lockers/internal/router/ioutil"
 	"github.com/zvdv/ECSS-Lockers/templates"
 )
 
-type dashData struct {
-	HasData  bool
-	UserName string
-	Locker   string
-	Lockers  []lockerState
-}
-
 type lockerState struct {
-	ID    string
-	InUse bool
+	IsAvailable bool
+	LockerID    string
 }
 
 func Dash(w http.ResponseWriter, r *http.Request) {
@@ -36,42 +33,38 @@ func Dash(w http.ResponseWriter, r *http.Request) {
 		logger.Fatal("credential not found in protected route")
 	}
 
+	data := struct {
+		HasLocker  bool
+		LockerName string
+	}{
+		HasLocker:  false,
+		LockerName: "",
+	}
+
 	db, lock := database.Lock()
 	defer lock.Unlock()
 
-	data := dashData{
-		HasData:  false,
-		UserName: "",
-		Locker:   "",
-		Lockers:  []lockerState{},
-	}
-
 	stmt, err := db.Prepare(`
-        SELECT locker, name 
+        SELECT locker
         FROM registration 
         WHERE user = :email 
         LIMIT 1;`)
+
 	if err != nil {
 		logger.Fatal(err)
 	}
 
-	err = stmt.QueryRow(sql.Named("email", email)).Scan(&data.Locker, &data.UserName)
+	err = stmt.QueryRow(sql.Named("email", email)).Scan(&data.LockerName)
 	if err != nil {
 		if !errors.Is(err, sql.ErrNoRows) {
-			panic(err)
+			logger.Error("error querying for registration: %v", err)
+			ioutil.WriteResponse(w, http.StatusInternalServerError, nil)
+			return
 		}
 	} else {
-		data.HasData = true
+		data.HasLocker = true
 		templates.Html(w, "templates/dash/index.html", data)
 		return
-	}
-
-	// query for all lockers
-	rows, err := db.Query("SELECT id FROM locker;")
-	for rows.Next() {
-		var locker string
-		rows.Scan(&locker)
-		data.Lockers = append(data.Lockers, lockerState{locker, false})
 	}
 
 	templates.Html(w, "templates/dash/index.html", data)
@@ -89,7 +82,13 @@ func ApiLocker(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	lockerNum, err := strconv.ParseUint(r.FormValue("locker"), 10, 16)
+	locker := r.FormValue("locker")
+	if len(locker) == 0 {
+		ioutil.WriteResponse(w, http.StatusOK, nil)
+		return
+	}
+
+	lockerNum, err := strconv.ParseUint(locker, 10, 16)
 	if err != nil {
 		ioutil.WriteResponse(
 			w,
@@ -107,24 +106,20 @@ func ApiLocker(w http.ResponseWriter, r *http.Request) {
         LEFT JOIN registration 
         ON locker.id = registration.locker
         WHERE locker.id 
-        LIKE ?;
-        `)
+        LIKE ?;`)
+
 	if err != nil {
 		logger.Fatal("stmt error:", err)
 	}
 
-	locker := fmt.Sprintf("%%ELW %d%%", lockerNum)
+	locker = fmt.Sprintf("%%ELW %d%%", lockerNum)
+
 	rows, err := stmt.Query(locker)
 	if err != nil {
 		panic(err)
 	}
 
-	type Locker struct {
-		IsAvailable bool
-		LockerID    string
-	}
-
-	lockers := []Locker{}
+	lockers := []lockerState{}
 	for rows.Next() {
 		var (
 			lockerID       string
@@ -137,7 +132,7 @@ func ApiLocker(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		lockers = append(lockers, Locker{
+		lockers = append(lockers, lockerState{
 			IsAvailable: !registrationID.Valid,
 			LockerID:    lockerID,
 		})
@@ -145,7 +140,7 @@ func ApiLocker(w http.ResponseWriter, r *http.Request) {
 
 	data := struct {
 		LockerOK bool
-		Lockers  []Locker
+		Lockers  []lockerState
 	}{
 		LockerOK: len(lockers) != 0,
 		Lockers:  lockers,
@@ -155,16 +150,47 @@ func ApiLocker(w http.ResponseWriter, r *http.Request) {
 }
 
 func DashLockerRegister(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPut {
+	if r.Method != http.MethodPut && r.Method != http.MethodGet {
 		ioutil.WriteResponse(w, http.StatusMethodNotAllowed, nil)
 		return
 	}
 
 	if err := r.ParseForm(); err != nil {
-		panic(err)
+		logger.Error("error parsing form: %v", err)
+		ioutil.WriteResponse(w, http.StatusBadRequest, nil)
+		return
 	}
 
 	locker := r.FormValue("locker")
+
+	if r.Method == http.MethodGet {
+		templates.Html(w, "templates/dash/locker_register.html", locker)
+		return
+	}
+
+	userName := r.FormValue("name")
+
+	wg := new(sync.WaitGroup)
+	wg.Add(1)
+
+	// after this go routine, it is the base 64 encoded of
+	// the ciphertext produced by chacha20poly1305
+	userEmail := "foo.bar" // TODO: pull this from request context
+
+	go func(userEmail *string, username string, wg *sync.WaitGroup) {
+		defer wg.Done()
+
+		ciphertext, err := crypto.Encrypt(
+			internal.CipherKey,
+			[]byte(*userEmail),
+			[]byte(username))
+
+		if err != nil {
+			logger.Fatal(err)
+		}
+
+		*userEmail = crypto.Base64.EncodeToString(ciphertext)
+	}(&userEmail, userName, wg)
 
 	db, lock := database.Lock()
 	defer lock.Unlock()
@@ -178,19 +204,48 @@ func DashLockerRegister(w http.ResponseWriter, r *http.Request) {
         SELECT COUNT(*) 
         FROM registration 
         WHERE locker = :locker;`)
+
 	if err != nil {
 		logger.Fatal(err)
 	}
 
-	var registrationCount int
-	err = stmt.QueryRow(locker).Scan(&registrationCount)
+	var registrationCount uint8
+
+	err = stmt.QueryRow(sql.Named("locker", locker)).Scan(&registrationCount)
+	if err != nil {
+		logger.Error("error querying for locker: %v", err)
+		ioutil.WriteResponse(w, http.StatusInternalServerError, nil)
+		return
+	}
+
+	if registrationCount != 0 {
+		templates.Component(w, "templates/dash/locker_unavailable.html", nil)
+		return
+	}
+
+	stmt, err = db.Prepare(`
+        INSERT INTO registration (locker, user, name, expiry)
+        VALUES (:locker, :user, :name, :expiry);`)
+
 	if err != nil {
 		logger.Fatal(err)
 	}
 
-	logger.Trace("%d", registrationCount)
+	wg.Done()
 
-	// TODO: calculate exp timestamp
+	expiryDate := time.Now() // TODO: figure out expiry date
 
-	// TODO: write to db
+	_, err = stmt.Exec(
+		sql.Named("locker", locker),
+		sql.Named("user", userEmail),
+		sql.Named("name", userName),
+		sql.Named("expiry", expiryDate))
+
+	if err != nil {
+		logger.Error("error writing registration to db: %v", err)
+		ioutil.WriteResponse(w, http.StatusInternalServerError, nil)
+		return
+	}
+
+	templates.Component(w, "templates/dash/locker_register_ok.html", nil)
 }

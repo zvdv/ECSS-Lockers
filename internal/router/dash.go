@@ -124,12 +124,12 @@ func apiLocker(w http.ResponseWriter, r *http.Request) {
 	for rows.Next() {
 		var (
 			lockerID       string
-			registrationID string
+			registrationID sql.NullString
 		)
 
 		rows.Scan(&lockerID, &registrationID)
 		lockers = append(lockers, LockerState{
-			IsAvailable: len(registrationID) == 0,
+			IsAvailable: registrationID.Valid,
 			LockerID:    lockerID,
 		})
 	}

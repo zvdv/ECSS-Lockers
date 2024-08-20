@@ -3,20 +3,20 @@ package auth
 import (
 	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/zvdv/ECSS-Lockers/internal"
 	"github.com/zvdv/ECSS-Lockers/internal/crypto"
 	"github.com/zvdv/ECSS-Lockers/internal/email"
 	"github.com/zvdv/ECSS-Lockers/internal/httputil"
 	"github.com/zvdv/ECSS-Lockers/internal/logger"
+	"github.com/zvdv/ECSS-Lockers/internal/time"
 	"github.com/zvdv/ECSS-Lockers/templates"
 	"gopkg.in/gomail.v2"
 )
 
 const (
-    tokenExpireLimit uint64 = 900
-    sessionCookieMaxAge int = 3600
+	tokenExpireLimit    uint64 = 900
+	sessionCookieMaxAge int    = 3600
 )
 
 func AuthApiLogin(w http.ResponseWriter, r *http.Request) {
@@ -133,13 +133,13 @@ func AuthApiToken(w http.ResponseWriter, r *http.Request) {
 	}
 
 	cookie := http.Cookie{
-		Name:   "session",
-		Value:  crypto.Base64.EncodeToString(cookieValue),
-		Domain: internal.Domain,
-		Path:   "/",
-		MaxAge: sessionCookieMaxAge, // good for 1 hour
-		Secure:   false, // TODO: flip to true on prod
-		HttpOnly: false, // TODO: flip to true on prod
+		Name:     "session",
+		Value:    crypto.Base64.EncodeToString(cookieValue),
+		Domain:   internal.Domain,
+		Path:     "/",
+		MaxAge:   sessionCookieMaxAge, // good for 1 hour
+		Secure:   false,               // TODO: flip to true on prod
+		HttpOnly: false,               // TODO: flip to true on prod
 	}
 
 	http.SetCookie(w, &cookie)

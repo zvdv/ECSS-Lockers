@@ -3,9 +3,9 @@ package auth
 import (
 	"encoding/binary"
 	"encoding/hex"
-	"time"
 
 	"github.com/zvdv/ECSS-Lockers/internal"
+	"github.com/zvdv/ECSS-Lockers/internal/time"
 	"github.com/zvdv/ECSS-Lockers/internal/crypto"
 )
 

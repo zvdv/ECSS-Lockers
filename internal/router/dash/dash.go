@@ -7,13 +7,13 @@ import (
 	"net/http"
 	"strconv"
 	"sync"
-	"time"
 
 	"github.com/zvdv/ECSS-Lockers/internal"
 	"github.com/zvdv/ECSS-Lockers/internal/crypto"
 	"github.com/zvdv/ECSS-Lockers/internal/database"
 	"github.com/zvdv/ECSS-Lockers/internal/httputil"
 	"github.com/zvdv/ECSS-Lockers/internal/logger"
+	"github.com/zvdv/ECSS-Lockers/internal/time"
 	"github.com/zvdv/ECSS-Lockers/templates"
 )
 
@@ -24,16 +24,16 @@ type lockerState struct {
 
 func Dash(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-        httputil.WriteResponse(w, http.StatusMethodNotAllowed, nil)
+		httputil.WriteResponse(w, http.StatusMethodNotAllowed, nil)
 		return
 	}
 
-    email, err := httputil.ExtractUserEmail(r)
-    if err != nil {
-        logger.Error("error parsing user token: %v", err)
-        httputil.WriteResponse(w, http.StatusBadRequest, nil)
-        return
-    }
+	email, err := httputil.ExtractUserEmail(r)
+	if err != nil {
+		logger.Error("error parsing user token: %v", err)
+		httputil.WriteResponse(w, http.StatusBadRequest, nil)
+		return
+	}
 
 	data := struct {
 		HasLocker  bool
@@ -170,29 +170,29 @@ func DashLockerRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// after this go routine, `userName` is the base 64 encoded of
+	// the ciphertext produced by chacha20poly1305
 	userName := r.FormValue("name")
+
+	userID := httputil.ExtractUserID(r)
 
 	wg := new(sync.WaitGroup)
 	wg.Add(1)
 
-	// after this go routine, it is the base 64 encoded of
-	// the ciphertext produced by chacha20poly1305
-	userEmail := "foo.bar" // TODO: pull this from request context
-
-	go func(userEmail *string, username string, wg *sync.WaitGroup) {
+	go func(userEmail string, userName *string, wg *sync.WaitGroup) {
 		defer wg.Done()
 
 		ciphertext, err := crypto.Encrypt(
 			internal.CipherKey,
-			[]byte(*userEmail),
-			[]byte(username))
+			[]byte(*userName),
+			[]byte(userEmail))
 
 		if err != nil {
 			logger.Fatal(err)
 		}
 
-		*userEmail = crypto.Base64.EncodeToString(ciphertext)
-	}(&userEmail, userName, wg)
+		*userName = crypto.Base64.EncodeToString(ciphertext)
+	}(userID, &userName, wg)
 
 	db, lock := database.Lock()
 	defer lock.Unlock()
@@ -235,11 +235,11 @@ func DashLockerRegister(w http.ResponseWriter, r *http.Request) {
 
 	wg.Done()
 
-	expiryDate := time.Now() // TODO: figure out expiry date
+	expiryDate := time.NextExpiryDate(time.Now())
 
 	_, err = stmt.Exec(
 		sql.Named("locker", locker),
-		sql.Named("user", userEmail),
+		sql.Named("user", userID),
 		sql.Named("name", userName),
 		sql.Named("expiry", expiryDate))
 

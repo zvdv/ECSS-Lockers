@@ -16,7 +16,6 @@ var (
 		MailPort     int
 		Domain       string
 		CipherKey    []byte
-		DatabaseURL  string
 	}
 )
 
@@ -35,10 +34,6 @@ func init() {
 		logger.Warn("invalid value set for env $CIPHER_KEY, expected length of 32 bytes, got %d byte(s)",
 			len(Env.CipherKey))
 	}
-
-	Env.DatabaseURL = fmt.Sprintf("%s?authToken=%s",
-		EnvVar("TURSO_DATABASE_URL"),
-		EnvVar("TURSO_AUTH_TOKEN"))
 }
 
 func EnvMust(key string) string {

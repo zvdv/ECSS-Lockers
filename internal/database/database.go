@@ -18,15 +18,15 @@ var (
 func init() {
 	tursoURL := fmt.Sprintf(
 		"%s?authToken=%s",
-		env.MustEnv("TURSO_DATABASE_URL"),
-		env.MustEnv("TURSO_AUTH_TOKEN"))
+		env.MustEnv("DATABASE_URL"),
+		env.MustEnv("DATABASE_AUTH_TOKEN"))
 
 	var err error
 	db, err = sql.Open("libsql", tursoURL)
 	if err != nil {
 		logger.Fatal(err)
 	}
-    logger.Info("Connected to database")
+	logger.Info("Connected to database")
 
 	dbLock = new(sync.Mutex)
 }

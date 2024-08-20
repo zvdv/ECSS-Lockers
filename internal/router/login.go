@@ -19,7 +19,7 @@ func uvicEmailValidator(email string) bool {
 	return false
 }
 
-func  login(w http.ResponseWriter, r *http.Request) {
+func login(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
@@ -54,9 +54,9 @@ func  login(w http.ResponseWriter, r *http.Request) {
 	msg.SetHeader("To", userEmail)
 	msg.SetHeader("Subject", "Locker registration")
 	msg.SetBody("text/html", fmt.Sprintf(emailtemplate,
-		internal.Env.Domain,
+		internal.Domain,
 		tok,
-		internal.Env.HostEmail))
+		email.HostEmail))
 
 	if err := email.Send(msg); err != nil {
 		panic(err)

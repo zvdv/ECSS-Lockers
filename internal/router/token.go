@@ -53,7 +53,7 @@ func apiTokenValidator(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// cipher email, that will be the auth token
-	cookieValue, err := crypto.Encrypt(internal.Env.CipherKey, []byte(email), nil)
+	cookieValue, err := crypto.Encrypt(internal.CipherKey, []byte(email), nil)
 	if err != nil {
 		panic(err)
 	}
@@ -61,7 +61,7 @@ func apiTokenValidator(w http.ResponseWriter, r *http.Request) {
 	cookie := http.Cookie{
 		Name:   "session",
 		Value:  crypto.Base64.EncodeToString(cookieValue),
-		Domain: internal.Env.Domain,
+		Domain: internal.Domain,
 		Path:   "/",
 		MaxAge: 3600, // good for 1 hour
 		// MaxAge:   999999, // for local dev
@@ -87,7 +87,7 @@ func makeTokenFromEmail(email string) (string, error) {
 	binary.BigEndian.PutUint64(buf[:8], uint64(time.Now().Unix()))
 	copy(buf[8:], email)
 
-	ciphertext, err := crypto.Encrypt(internal.Env.CipherKey, buf, nil)
+	ciphertext, err := crypto.Encrypt(internal.CipherKey, buf, nil)
 	if err != nil {
 		return "", err
 	}
@@ -102,7 +102,7 @@ func parseToken(token string) (string, uint64, error) {
 		return "", 0, err
 	}
 
-	pt, err := crypto.Decrypt(internal.Env.CipherKey, decodedTokenBytes, nil)
+	pt, err := crypto.Decrypt(internal.CipherKey, decodedTokenBytes, nil)
 	if err != nil {
 		return "", 0, err
 	}

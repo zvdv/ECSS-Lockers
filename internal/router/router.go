@@ -52,12 +52,12 @@ func authenticatedUserOnly(next http.Handler) http.Handler {
 
 		sessionID, err := hex.DecodeString(cookie.Value)
 		if err != nil {
-			logger.Fatal("invalid session id: %v", err)
+			logger.Fatal("invalid session id:", err)
 		}
 
-		email, err := crypto.Decrypt(internal.Env.CipherKey, sessionID, nil)
+		email, err := crypto.Decrypt(internal.CipherKey, sessionID, nil)
 		if err != nil {
-			logger.Fatal("invalid decryption: %v", err)
+			logger.Fatal("invalid decryption:", err)
 		}
 
 		logger.Info("%s", string(email))

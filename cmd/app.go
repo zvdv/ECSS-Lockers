@@ -3,8 +3,8 @@ package main
 import (
 	"net/http"
 
-	_ "github.com/zvdv/ECSS-Lockers/internal"
 	_ "github.com/zvdv/ECSS-Lockers/internal/database"
+	_ "github.com/zvdv/ECSS-Lockers/internal"
 	"github.com/zvdv/ECSS-Lockers/internal/logger"
 	"github.com/zvdv/ECSS-Lockers/internal/router"
 )

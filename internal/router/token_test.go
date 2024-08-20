@@ -12,7 +12,7 @@ func TestTokenMaker(t *testing.T) {
 	if len(testCipherKey) != 32 {
 		panic(len(testCipherKey))
 	}
-	internal.Env.CipherKey = []byte(testCipherKey)
+	internal.CipherKey = []byte(testCipherKey)
 
 	email := "halnguyen@uvic.ca"
 	tok, err := makeTokenFromEmail(email)

@@ -20,8 +20,10 @@ Note: for auth cookie to work, go on your browser `http://127.0.0.1:8080`
 ### Environment variables
 
 ```txt
-GMAIL_USER=<ecss email>
-GMAIL_PASSWORD=<ecss email password/app password>
-ORIGIN=<hosting domain>
-CIPHER_KEY=<32 char key>
+EMAIL_HOST_ADDRESS=
+EMAIL_HOST_PASSWORD=
+CIPHER_KEY=
+DOMAIN=
+DATABASE_URL=
+DATABASE_AUTH_TOKEN=
 ```

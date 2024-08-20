@@ -1,13 +1,12 @@
 package main
 
 import (
-	"context"
 	"database/sql"
 	"fmt"
-	"time"
 
-	"github.com/zvdv/ECSS-Lockers/internal"
+	"github.com/joho/godotenv"
 	"github.com/zvdv/ECSS-Lockers/internal/database"
+	"github.com/zvdv/ECSS-Lockers/internal/env"
 	"github.com/zvdv/ECSS-Lockers/internal/logger"
 )
 
@@ -22,6 +21,7 @@ CREATE TABLE IF NOT EXISTS registration (
     user varchar(255) NOT NULL,
     name varchar(255) NOT NULL,
     expiry datetime NOT NULL,
+    expiryEmailSent boolean DEFAULT FALSE,
     PRIMARY KEY (locker)
 );
 
@@ -30,40 +30,43 @@ ON registration (user);
 `
 
 func main() {
-	logger.Info("DATABASE MIGRATION")
-
-	dbUrl := fmt.Sprintf("%s?authToken=%s",
-		internal.EnvMust("TURSO_DATABASE_URL"),
-		internal.EnvMust("TURSO_AUTH_TOKEN"))
-
-	if err := database.Initialize(dbUrl); err != nil {
+	if err := godotenv.Load(); err != nil {
 		logger.Fatal(err)
 	}
 
+	logger.Info("DATABASE MIGRATION")
+
+	database.Connect(fmt.Sprintf(
+		"%s?authToken=%s",
+		env.MustEnv("DATABASE_URL"),
+		env.MustEnv("DATABASE_AUTH_TOKEN")))
+
 	db, lock := database.Lock()
 	defer lock.Unlock()
-	logger.Info("Connected to database")
 
 	if _, err := db.Exec(schemas); err != nil {
 		logger.Fatal(err)
 	}
-	logger.Info("Schema migrated.")
 
-	for i := 1; i <= 200; i++ {
-		locker := fmt.Sprintf("ELW %03d", i)
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
-		_, err := db.ExecContext(
-			ctx,
-			"INSERT INTO locker (id) VALUES (:id);",
-			sql.Named("id", locker))
+	logger.Info("created schema.")
+
+	logger.Info("seeding 200 lockers..")
+	// eeehhh i'm not proud of how this is being done but
+	// database/sql does not support array type for query
+	// arg out of the box :(
+	for i := 0; i < 200; i++ {
+		locker := fmt.Sprintf("ELW %03d", i+1)
+
+		stmt, err := db.Prepare(`INSERT INTO locker (id) VALUES (:id);`)
 		if err != nil {
-			logger.Error(
-				"Failed to insert locker %s to database:\n%v",
-				locker,
-				err)
+			logger.Fatal(err)
+		}
+
+		_, err = stmt.Exec(sql.Named("id", locker))
+		if err != nil {
+			logger.Error("error seeding locker %s:\n%v", locker, err)
 		}
 	}
-	logger.Info("Seeded lockers")
 
+	logger.Info("Done")
 }

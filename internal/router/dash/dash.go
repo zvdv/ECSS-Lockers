@@ -1,4 +1,4 @@
-package router
+package dash
 
 import (
 	"database/sql"
@@ -9,7 +9,7 @@ import (
 
 	"github.com/zvdv/ECSS-Lockers/internal/database"
 	"github.com/zvdv/ECSS-Lockers/internal/logger"
-	"github.com/zvdv/ECSS-Lockers/internal/router/utils"
+	"github.com/zvdv/ECSS-Lockers/internal/router/ioutil"
 	"github.com/zvdv/ECSS-Lockers/templates"
 )
 
@@ -25,7 +25,7 @@ type lockerState struct {
 	InUse bool
 }
 
-func dash(w http.ResponseWriter, r *http.Request) {
+func Dash(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
@@ -33,7 +33,7 @@ func dash(w http.ResponseWriter, r *http.Request) {
 
 	email, ok := r.Context().Value("user_email").(string)
 	if !ok {
-		panic("credential not found in protected route")
+		logger.Fatal("credential not found in protected route")
 	}
 
 	db, lock := database.Lock()
@@ -46,19 +46,23 @@ func dash(w http.ResponseWriter, r *http.Request) {
 		Lockers:  []lockerState{},
 	}
 
-	err := db.QueryRow(
-		`SELECT locker, name FROM registration WHERE user = :email LIMIT 1;`,
-		sql.Named("email", email)).Scan(&data.Locker, &data.UserName)
+	stmt, err := db.Prepare(`
+        SELECT locker, name 
+        FROM registration 
+        WHERE user = :email 
+        LIMIT 1;`)
+	if err != nil {
+		logger.Fatal(err)
+	}
+
+	err = stmt.QueryRow(sql.Named("email", email)).Scan(&data.Locker, &data.UserName)
 	if err != nil {
 		if !errors.Is(err, sql.ErrNoRows) {
 			panic(err)
 		}
 	} else {
 		data.HasData = true
-		if err := templates.Html(w, "templates/dash/index.html", data); err != nil {
-			logger.Error(err.Error())
-			utils.WriteResponse(w, http.StatusInternalServerError, nil)
-		}
+		templates.Html(w, "templates/dash/index.html", data)
 		return
 	}
 
@@ -70,25 +74,24 @@ func dash(w http.ResponseWriter, r *http.Request) {
 		data.Lockers = append(data.Lockers, lockerState{locker, false})
 	}
 
-	if err := templates.Html(w, "templates/dash/index.html", data); err != nil {
-		logger.Error(err.Error())
-		utils.WriteResponse(w, http.StatusInternalServerError, nil)
-	}
+	templates.Html(w, "templates/dash/index.html", data)
 }
 
-func apiLocker(w http.ResponseWriter, r *http.Request) {
+func ApiLocker(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPut {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
 
 	if err := r.ParseForm(); err != nil {
-		panic(err)
+		logger.Error("failed to parse form: %v", err)
+		ioutil.WriteResponse(w, http.StatusInternalServerError, nil)
+		return
 	}
 
 	lockerNum, err := strconv.ParseUint(r.FormValue("locker"), 10, 16)
 	if err != nil {
-		utils.WriteResponse(
+		ioutil.WriteResponse(
 			w,
 			http.StatusOK,
 			[]byte("<p class=\"text-error text-center\">Invalid locker</p>"))
@@ -99,13 +102,15 @@ func apiLocker(w http.ResponseWriter, r *http.Request) {
 	defer lock.Unlock()
 
 	stmt, err := db.Prepare(`
-        SELECT locker.id, registration.locker FROM locker
-        LEFT JOIN registration ON locker.id = registration.locker
-        WHERE locker.id LIKE?;
+        SELECT locker.id, registration.locker 
+        FROM locker
+        LEFT JOIN registration 
+        ON locker.id = registration.locker
+        WHERE locker.id 
+        LIKE ?;
         `)
 	if err != nil {
-		logger.Fatal("stmt error", err)
-		return
+		logger.Fatal("stmt error:", err)
 	}
 
 	locker := fmt.Sprintf("%%ELW %d%%", lockerNum)
@@ -114,20 +119,25 @@ func apiLocker(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	type LockerState struct {
+	type Locker struct {
 		IsAvailable bool
 		LockerID    string
 	}
 
-	lockers := []LockerState{}
+	lockers := []Locker{}
 	for rows.Next() {
 		var (
 			lockerID       string
 			registrationID sql.NullString
 		)
 
-		rows.Scan(&lockerID, &registrationID)
-		lockers = append(lockers, LockerState{
+		if err := rows.Scan(&lockerID, &registrationID); err != nil {
+			logger.Error("failed to scan data: %v", err)
+			ioutil.WriteResponse(w, http.StatusInternalServerError, nil)
+			return
+		}
+
+		lockers = append(lockers, Locker{
 			IsAvailable: !registrationID.Valid,
 			LockerID:    lockerID,
 		})
@@ -135,20 +145,18 @@ func apiLocker(w http.ResponseWriter, r *http.Request) {
 
 	data := struct {
 		LockerOK bool
-		Lockers  []LockerState
+		Lockers  []Locker
 	}{
 		LockerOK: len(lockers) != 0,
 		Lockers:  lockers,
 	}
 
-	if err := templates.Component(w, "templates/dash/locker_card.html", data); err != nil {
-		panic(err)
-	}
+	templates.Component(w, "templates/dash/locker_card.html", data)
 }
 
-func apiLockerConfirm(w http.ResponseWriter, r *http.Request) {
+func DashLockerRegister(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPut {
-		utils.WriteResponse(w, http.StatusMethodNotAllowed, nil)
+		ioutil.WriteResponse(w, http.StatusMethodNotAllowed, nil)
 		return
 	}
 
@@ -157,7 +165,30 @@ func apiLockerConfirm(w http.ResponseWriter, r *http.Request) {
 	}
 
 	locker := r.FormValue("locker")
-	logger.Info(locker)
+
+	db, lock := database.Lock()
+	defer lock.Unlock()
+
+	var (
+		stmt *sql.Stmt
+		err  error
+	)
+
+	stmt, err = db.Prepare(`
+        SELECT COUNT(*) 
+        FROM registration 
+        WHERE locker = :locker;`)
+	if err != nil {
+		logger.Fatal(err)
+	}
+
+	var registrationCount int
+	err = stmt.QueryRow(locker).Scan(&registrationCount)
+	if err != nil {
+		logger.Fatal(err)
+	}
+
+	logger.Trace("%d", registrationCount)
 
 	// TODO: calculate exp timestamp
 

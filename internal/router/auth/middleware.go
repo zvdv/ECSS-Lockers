@@ -7,7 +7,6 @@ import (
 	"github.com/zvdv/ECSS-Lockers/internal"
 	"github.com/zvdv/ECSS-Lockers/internal/crypto"
 	"github.com/zvdv/ECSS-Lockers/internal/logger"
-	"github.com/zvdv/ECSS-Lockers/internal/router/utils"
 	"github.com/zvdv/ECSS-Lockers/templates"
 )
 
@@ -15,10 +14,7 @@ func AuthenticatedUserOnly(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		cookie, err := r.Cookie("session")
 		if err != nil {
-			err := templates.Html(w, "templates/auth/session_expired.html", nil)
-			if err != nil {
-				utils.WriteResponse(w, http.StatusInternalServerError, nil)
-			}
+			templates.Html(w, "templates/auth/session_expired.html", nil)
 			return
 		}
 

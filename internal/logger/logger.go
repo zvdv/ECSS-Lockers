@@ -25,7 +25,7 @@ func init() {
 	warn = log.New(os.Stdout, warnPrefix, log.LstdFlags)
 
 	errorPrefix := color.RedString("[ERROR] ")
-	error = log.New(os.Stderr, errorPrefix, log.LstdFlags)
+	error = log.New(os.Stderr, errorPrefix, log.LstdFlags|log.Llongfile)
 }
 
 func Info(format string, v ...any) {

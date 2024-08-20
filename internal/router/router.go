@@ -9,6 +9,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/zvdv/ECSS-Lockers/internal/logger"
 	"github.com/zvdv/ECSS-Lockers/internal/router/auth"
+	"github.com/zvdv/ECSS-Lockers/internal/router/dash"
 )
 
 func New() *chi.Mux {
@@ -29,9 +30,9 @@ func New() *chi.Mux {
 
 	app.Route("/dash", func(r chi.Router) {
 		r.Use(auth.AuthenticatedUserOnly)
-		r.Handle("/", http.HandlerFunc(dash))
-		r.Handle("/api/locker", http.HandlerFunc(apiLocker))
-		r.Handle("/api/locker/confirm", http.HandlerFunc(apiLockerConfirm))
+		r.Handle("/", http.HandlerFunc(dash.Dash))
+		r.Handle("/locker/register", http.HandlerFunc(dash.DashLockerRegister))
+		r.Handle("/api/locker", http.HandlerFunc(dash.ApiLocker))
 	})
 
 	return app

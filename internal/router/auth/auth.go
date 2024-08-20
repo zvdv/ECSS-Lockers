@@ -9,7 +9,7 @@ import (
 	"github.com/zvdv/ECSS-Lockers/internal/crypto"
 	"github.com/zvdv/ECSS-Lockers/internal/email"
 	"github.com/zvdv/ECSS-Lockers/internal/logger"
-	"github.com/zvdv/ECSS-Lockers/internal/router/utils"
+	"github.com/zvdv/ECSS-Lockers/internal/router/ioutil"
 	"github.com/zvdv/ECSS-Lockers/templates"
 	"gopkg.in/gomail.v2"
 )
@@ -21,7 +21,7 @@ func AuthApiLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := r.ParseForm(); err != nil {
-		utils.WriteResponse(w, http.StatusBadRequest, []byte("invalid form data"))
+		ioutil.WriteResponse(w, http.StatusBadRequest, []byte("invalid form data"))
 		return
 	}
 
@@ -35,7 +35,7 @@ func AuthApiLogin(w http.ResponseWriter, r *http.Request) {
             <button type="submit" class="btn btn-primary btn-block">Login</button>
             <div class="form-error">Invalid UVic email address</div>
             `
-		utils.WriteResponse(w, http.StatusOK, []byte(data))
+		ioutil.WriteResponse(w, http.StatusOK, []byte(data))
 		return
 	}
 
@@ -61,7 +61,7 @@ func AuthApiLogin(w http.ResponseWriter, r *http.Request) {
 	html := fmt.Sprintf(`<span class="form-info">
         Login link sent to %s!
         </span>`, userEmail)
-	utils.WriteResponse(w, http.StatusOK, []byte(html))
+	ioutil.WriteResponse(w, http.StatusOK, []byte(html))
 }
 
 const emailtemplate string = `Hello!
@@ -96,9 +96,7 @@ func Auth(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	if err := templates.Html(w, "templates/auth/validate.html", data); err != nil {
-		utils.WriteResponse(w, http.StatusInternalServerError, []byte(err.Error()))
-	}
+	templates.Html(w, "templates/auth/validate.html", data)
 }
 
 func AuthApiToken(w http.ResponseWriter, r *http.Request) {
@@ -112,14 +110,14 @@ func AuthApiToken(w http.ResponseWriter, r *http.Request) {
 	email, ts, err := ParseToken(token)
 	if err != nil {
 		logger.Error("Failed to parse token:\n%v", err)
-		utils.WriteResponse(w, http.StatusInternalServerError, nil)
+		ioutil.WriteResponse(w, http.StatusInternalServerError, nil)
 		return
 	}
 
 	// token expired?
 	now := uint64(time.Now().Unix())
 	if now-ts >= 900 { // token expires in 15 mins
-		utils.WriteResponse(w, http.StatusUnauthorized, []byte("token exired"))
+		ioutil.WriteResponse(w, http.StatusUnauthorized, []byte("token exired"))
 		return
 	}
 

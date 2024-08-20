@@ -6,8 +6,8 @@ import (
 	"html/template"
 	"net/http"
 
+	"github.com/zvdv/ECSS-Lockers/internal/httputil"
 	"github.com/zvdv/ECSS-Lockers/internal/logger"
-	"github.com/zvdv/ECSS-Lockers/internal/router/ioutil"
 )
 
 const htmlBase string = `
@@ -38,20 +38,20 @@ const htmlBase string = `
 func Html(w http.ResponseWriter, fileName string, data any) {
 	tmpl, err := template.ParseFiles(fileName)
 	if err != nil {
-		ioutil.WriteResponse(w, http.StatusInternalServerError, nil)
+		httputil.WriteResponse(w, http.StatusInternalServerError, nil)
 		logger.Error("error reading file %s: %v", fileName, err)
 		return
 	}
 
 	buf := bytes.NewBuffer(nil)
 	if err := tmpl.Execute(buf, data); err != nil {
-		ioutil.WriteResponse(w, http.StatusInternalServerError, nil)
+		httputil.WriteResponse(w, http.StatusInternalServerError, nil)
 		logger.Error("error executing template data: %v", err)
 		return
 	}
 
 	html := fmt.Sprintf(htmlBase, buf.String())
-	ioutil.WriteResponse(w, http.StatusOK, []byte(html))
+	httputil.WriteResponse(w, http.StatusOK, []byte(html))
 }
 
 func Component(writer http.ResponseWriter, fileName string, data any) {
@@ -64,6 +64,6 @@ func Component(writer http.ResponseWriter, fileName string, data any) {
 
 	if err := tmpl.Execute(writer, data); err != nil {
 		logger.Error("error writing template: %v", err)
-		ioutil.WriteResponse(writer, http.StatusInternalServerError, nil)
+		httputil.WriteResponse(writer, http.StatusInternalServerError, nil)
 	}
 }

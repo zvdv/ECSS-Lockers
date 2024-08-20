@@ -8,10 +8,15 @@ import (
 	"github.com/zvdv/ECSS-Lockers/internal"
 	"github.com/zvdv/ECSS-Lockers/internal/crypto"
 	"github.com/zvdv/ECSS-Lockers/internal/email"
+	"github.com/zvdv/ECSS-Lockers/internal/httputil"
 	"github.com/zvdv/ECSS-Lockers/internal/logger"
-	"github.com/zvdv/ECSS-Lockers/internal/router/ioutil"
 	"github.com/zvdv/ECSS-Lockers/templates"
 	"gopkg.in/gomail.v2"
+)
+
+const (
+    tokenExpireLimit uint64 = 900
+    sessionCookieMaxAge int = 3600
 )
 
 func AuthApiLogin(w http.ResponseWriter, r *http.Request) {
@@ -21,7 +26,7 @@ func AuthApiLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := r.ParseForm(); err != nil {
-		ioutil.WriteResponse(w, http.StatusBadRequest, []byte("invalid form data"))
+		httputil.WriteResponse(w, http.StatusBadRequest, []byte("invalid form data"))
 		return
 	}
 
@@ -35,7 +40,7 @@ func AuthApiLogin(w http.ResponseWriter, r *http.Request) {
             <button type="submit" class="btn btn-primary btn-block">Login</button>
             <div class="form-error">Invalid UVic email address</div>
             `
-		ioutil.WriteResponse(w, http.StatusOK, []byte(data))
+		httputil.WriteResponse(w, http.StatusOK, []byte(data))
 		return
 	}
 
@@ -61,7 +66,7 @@ func AuthApiLogin(w http.ResponseWriter, r *http.Request) {
 	html := fmt.Sprintf(`<span class="form-info">
         Login link sent to %s!
         </span>`, userEmail)
-	ioutil.WriteResponse(w, http.StatusOK, []byte(html))
+	httputil.WriteResponse(w, http.StatusOK, []byte(html))
 }
 
 const emailtemplate string = `Hello!
@@ -110,14 +115,14 @@ func AuthApiToken(w http.ResponseWriter, r *http.Request) {
 	email, ts, err := ParseToken(token)
 	if err != nil {
 		logger.Error("Failed to parse token:\n%v", err)
-		ioutil.WriteResponse(w, http.StatusInternalServerError, nil)
+		httputil.WriteResponse(w, http.StatusInternalServerError, nil)
 		return
 	}
 
 	// token expired?
 	now := uint64(time.Now().Unix())
-	if now-ts >= 900 { // token expires in 15 mins
-		ioutil.WriteResponse(w, http.StatusUnauthorized, []byte("token exired"))
+	if now-ts >= tokenExpireLimit { // token expires in 15 mins
+		httputil.WriteResponse(w, http.StatusUnauthorized, []byte("token exired"))
 		return
 	}
 
@@ -132,8 +137,7 @@ func AuthApiToken(w http.ResponseWriter, r *http.Request) {
 		Value:  crypto.Base64.EncodeToString(cookieValue),
 		Domain: internal.Domain,
 		Path:   "/",
-		MaxAge: 3600, // good for 1 hour
-		// MaxAge:   999999, // for local dev
+		MaxAge: sessionCookieMaxAge, // good for 1 hour
 		Secure:   false, // TODO: flip to true on prod
 		HttpOnly: false, // TODO: flip to true on prod
 	}

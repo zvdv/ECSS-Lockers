@@ -12,8 +12,8 @@ import (
 	"github.com/zvdv/ECSS-Lockers/internal"
 	"github.com/zvdv/ECSS-Lockers/internal/crypto"
 	"github.com/zvdv/ECSS-Lockers/internal/database"
+	"github.com/zvdv/ECSS-Lockers/internal/httputil"
 	"github.com/zvdv/ECSS-Lockers/internal/logger"
-	"github.com/zvdv/ECSS-Lockers/internal/router/ioutil"
 	"github.com/zvdv/ECSS-Lockers/templates"
 )
 
@@ -58,7 +58,7 @@ func Dash(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if !errors.Is(err, sql.ErrNoRows) {
 			logger.Error("error querying for registration: %v", err)
-			ioutil.WriteResponse(w, http.StatusInternalServerError, nil)
+			httputil.WriteResponse(w, http.StatusInternalServerError, nil)
 			return
 		}
 	} else {
@@ -78,19 +78,19 @@ func ApiLocker(w http.ResponseWriter, r *http.Request) {
 
 	if err := r.ParseForm(); err != nil {
 		logger.Error("failed to parse form: %v", err)
-		ioutil.WriteResponse(w, http.StatusInternalServerError, nil)
+		httputil.WriteResponse(w, http.StatusInternalServerError, nil)
 		return
 	}
 
 	locker := r.FormValue("locker")
 	if len(locker) == 0 {
-		ioutil.WriteResponse(w, http.StatusOK, nil)
+		httputil.WriteResponse(w, http.StatusOK, nil)
 		return
 	}
 
 	lockerNum, err := strconv.ParseUint(locker, 10, 16)
 	if err != nil {
-		ioutil.WriteResponse(
+		httputil.WriteResponse(
 			w,
 			http.StatusOK,
 			[]byte("<p class=\"text-error text-center\">Invalid locker</p>"))
@@ -128,7 +128,7 @@ func ApiLocker(w http.ResponseWriter, r *http.Request) {
 
 		if err := rows.Scan(&lockerID, &registrationID); err != nil {
 			logger.Error("failed to scan data: %v", err)
-			ioutil.WriteResponse(w, http.StatusInternalServerError, nil)
+			httputil.WriteResponse(w, http.StatusInternalServerError, nil)
 			return
 		}
 
@@ -151,13 +151,13 @@ func ApiLocker(w http.ResponseWriter, r *http.Request) {
 
 func DashLockerRegister(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPut && r.Method != http.MethodGet {
-		ioutil.WriteResponse(w, http.StatusMethodNotAllowed, nil)
+		httputil.WriteResponse(w, http.StatusMethodNotAllowed, nil)
 		return
 	}
 
 	if err := r.ParseForm(); err != nil {
 		logger.Error("error parsing form: %v", err)
-		ioutil.WriteResponse(w, http.StatusBadRequest, nil)
+		httputil.WriteResponse(w, http.StatusBadRequest, nil)
 		return
 	}
 
@@ -214,7 +214,7 @@ func DashLockerRegister(w http.ResponseWriter, r *http.Request) {
 	err = stmt.QueryRow(sql.Named("locker", locker)).Scan(&registrationCount)
 	if err != nil {
 		logger.Error("error querying for locker: %v", err)
-		ioutil.WriteResponse(w, http.StatusInternalServerError, nil)
+		httputil.WriteResponse(w, http.StatusInternalServerError, nil)
 		return
 	}
 
@@ -243,7 +243,7 @@ func DashLockerRegister(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		logger.Error("error writing registration to db: %v", err)
-		ioutil.WriteResponse(w, http.StatusInternalServerError, nil)
+		httputil.WriteResponse(w, http.StatusInternalServerError, nil)
 		return
 	}
 

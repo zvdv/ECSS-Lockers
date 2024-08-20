@@ -2,17 +2,18 @@
   <img
     class="w-10"
     src="/assets/imgs/ess_ring_orange_trans.png"
-    alt="UVic ESS Logo"
+    alt="UVic ECSS Logo"
   />
   <h1 class="text-xl font-semibold">Locker registrations</h1>
 </nav>
 
-<main class="px-10 py-10">
+<main class="grid place-items-center">
   {{if .HasLocker}}
 
-  <div class="mx-auto text-center">
-    <h1>Locker registered</h1>
-    <h2 class="text-primary text-3xl">{{.LockerName}}</h2>
+  <div class="text-center">
+    <h2 class="text-lg">Locker registered!</h2>
+    <h1 class="text-primary text-5xl font-semibold">{{.LockerName}}</h1>
+    <span class="text-xs opacity-60 italic">Expire on {{.ExpireAt}}</span>
   </div>
 
   {{else}}

@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"strconv"
 
+	stdtime "time"
+
 	"github.com/zvdv/ECSS-Lockers/internal"
 	"github.com/zvdv/ECSS-Lockers/internal/crypto"
 	"github.com/zvdv/ECSS-Lockers/internal/database"
@@ -27,26 +29,23 @@ func Dash(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	email, err := httputil.ExtractUserEmail(r)
-	if err != nil {
-		logger.Error("error parsing user token: %v", err)
-		httputil.WriteResponse(w, http.StatusBadRequest, nil)
-		return
-	}
+	userID := httputil.ExtractUserID(r)
 
 	data := struct {
 		HasLocker  bool
 		LockerName string
+		ExpireAt   string
 	}{
 		HasLocker:  false,
 		LockerName: "",
+		ExpireAt:   "",
 	}
 
 	db, lock := database.Lock()
 	defer lock.Unlock()
 
 	stmt, err := db.Prepare(`
-        SELECT locker
+        SELECT locker, expiry
         FROM registration 
         WHERE user = :email 
         LIMIT 1;`)
@@ -55,16 +54,22 @@ func Dash(w http.ResponseWriter, r *http.Request) {
 		logger.Fatal(err)
 	}
 
-	err = stmt.QueryRow(sql.Named("email", email)).Scan(&data.LockerName)
+	var expiry stdtime.Time
+
+	err = stmt.QueryRow(sql.Named("email", userID)).Scan(&data.LockerName, &expiry)
 	if err != nil {
 		if !errors.Is(err, sql.ErrNoRows) {
 			logger.Error("error querying for registration: %v", err)
 			httputil.WriteResponse(w, http.StatusInternalServerError, nil)
+
 			return
 		}
+
 	} else {
 		data.HasLocker = true
+		data.ExpireAt = expiry.Format("Jan 2, 2006 at 3:04pm")
 		templates.Html(w, "templates/dash/index.html", data)
+
 		return
 	}
 

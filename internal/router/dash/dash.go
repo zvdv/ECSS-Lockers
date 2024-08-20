@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"sync"
 
 	"github.com/zvdv/ECSS-Lockers/internal"
 	"github.com/zvdv/ECSS-Lockers/internal/crypto"
@@ -176,23 +175,21 @@ func DashLockerRegister(w http.ResponseWriter, r *http.Request) {
 
 	userID := httputil.ExtractUserID(r)
 
-	wg := new(sync.WaitGroup)
-	wg.Add(1)
+	type EncryptResult struct {
+		ciphertext []byte
+		err        error
+	}
 
-	go func(userEmail string, userName *string, wg *sync.WaitGroup) {
-		defer wg.Done()
+	ch := make(chan EncryptResult)
 
+	go func(userEmail string, userName string, ch chan<- EncryptResult) {
 		ciphertext, err := crypto.Encrypt(
 			internal.CipherKey,
-			[]byte(*userName),
+			[]byte(userName),
 			[]byte(userEmail))
 
-		if err != nil {
-			logger.Fatal(err)
-		}
-
-		*userName = crypto.Base64.EncodeToString(ciphertext)
-	}(userID, &userName, wg)
+		ch <- EncryptResult{ciphertext, err}
+	}(userID, userName, ch)
 
 	db, lock := database.Lock()
 	defer lock.Unlock()
@@ -233,14 +230,18 @@ func DashLockerRegister(w http.ResponseWriter, r *http.Request) {
 		logger.Fatal(err)
 	}
 
-	wg.Done()
+	encryptResult := <-ch
+	if encryptResult.err != nil {
+		logger.Error("failed to encrypt plaintext: %v", encryptResult.err)
+		httputil.WriteResponse(w, http.StatusInternalServerError, nil)
+	}
 
 	expiryDate := time.NextExpiryDate(time.Now())
 
 	_, err = stmt.Exec(
 		sql.Named("locker", locker),
 		sql.Named("user", userID),
-		sql.Named("name", userName),
+		sql.Named("name", crypto.Base64.EncodeToString(encryptResult.ciphertext)),
 		sql.Named("expiry", expiryDate))
 
 	if err != nil {

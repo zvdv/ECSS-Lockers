@@ -16,6 +16,6 @@ func init() {
 		logger.Warn("failed to load env variables: %v", err)
 	}
 
-	Domain = env.MustEnv("DOMAIN")
-	CipherKey = []byte(env.MustEnv("CIPHER_KEY"))
+	Domain = env.Env("DOMAIN")
+	CipherKey = []byte(env.Env("CIPHER_KEY"))
 }

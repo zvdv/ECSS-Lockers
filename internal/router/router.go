@@ -1,18 +1,14 @@
 package router
 
 import (
-	"context"
-	"encoding/hex"
 	"net/http"
 	"time"
 
 	"github.com/fatih/color"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/zvdv/ECSS-Lockers/internal"
-	"github.com/zvdv/ECSS-Lockers/internal/crypto"
 	"github.com/zvdv/ECSS-Lockers/internal/logger"
-	"github.com/zvdv/ECSS-Lockers/templates"
+	"github.com/zvdv/ECSS-Lockers/internal/router/auth"
 )
 
 func New() *chi.Mux {
@@ -24,56 +20,21 @@ func New() *chi.Mux {
 
 	app.Handle("/assets/*", http.StripPrefix("/assets/", http.FileServer(http.Dir("assets"))))
 	app.Handle("/", http.HandlerFunc(index))
-	app.Handle("/api/login", http.HandlerFunc(login))
-	app.Handle("/token", http.HandlerFunc(tokenValidator))
-	app.Handle("/api/token", http.HandlerFunc(apiTokenValidator))
 
-	// TODO: Middleware to validate cookie here
+	app.Route("/auth", func(r chi.Router) {
+		r.Handle("/", http.HandlerFunc(auth.Auth))
+		r.Handle("/api/login", http.HandlerFunc(auth.AuthApiLogin))
+		r.Handle("/api/token", http.HandlerFunc(auth.AuthApiToken))
+	})
+
 	app.Route("/dash", func(r chi.Router) {
-		r.Use(authenticatedUserOnly)
+		r.Use(auth.AuthenticatedUserOnly)
 		r.Handle("/", http.HandlerFunc(dash))
 		r.Handle("/api/locker", http.HandlerFunc(apiLocker))
 		r.Handle("/api/locker/confirm", http.HandlerFunc(apiLockerConfirm))
 	})
 
 	return app
-}
-
-func authenticatedUserOnly(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		cookie, err := r.Cookie("session")
-		if err != nil {
-			err := templates.Html(w, "templates/session_expired.html", nil)
-			if err != nil {
-				writeResponse(w, http.StatusInternalServerError, nil)
-			}
-			return
-		}
-
-		sessionID, err := hex.DecodeString(cookie.Value)
-		if err != nil {
-			logger.Fatal("invalid session id:", err)
-		}
-
-		email, err := crypto.Decrypt(internal.CipherKey, sessionID, nil)
-		if err != nil {
-			logger.Fatal("invalid decryption:", err)
-		}
-
-		logger.Info("%s", string(email))
-
-		ctx := context.WithValue(r.Context(), "user_email", string(email))
-		next.ServeHTTP(w, r.WithContext(ctx))
-	})
-}
-
-func writeResponse(w http.ResponseWriter, status int, writeData []byte) {
-	w.WriteHeader(status)
-	if writeData != nil {
-		if _, err := w.Write(writeData); err != nil {
-			logger.Error("failed to write response: %s", err)
-		}
-	}
 }
 
 func requestLogger(next http.Handler) http.Handler {

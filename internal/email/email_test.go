@@ -1,7 +1,9 @@
-package router
+package email_test
 
 import (
 	"testing"
+
+	"github.com/zvdv/ECSS-Lockers/internal/email"
 )
 
 func TestFormValidate(t *testing.T) {
@@ -11,9 +13,9 @@ func TestFormValidate(t *testing.T) {
 		"Goobarba_123z@uvic.ca",
 	}
 
-	for _, email := range validEmail {
-		if !uvicEmailValidator(email) {
-			t.Fail()
+	for _, addr := range validEmail {
+		if !email.ValidUVicEmail(addr) {
+			t.Fatal(addr)
 		}
 	}
 
@@ -23,9 +25,9 @@ func TestFormValidate(t *testing.T) {
 		"Goobarba_123z@gmail.uk",
 	}
 
-	for _, email := range invalidEmails {
-		if uvicEmailValidator(email) {
-			t.Fail()
+	for _, addr := range invalidEmails {
+		if email.ValidUVicEmail(addr) {
+			t.Fatal(addr)
 		}
 	}
 }

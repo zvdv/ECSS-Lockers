@@ -9,6 +9,7 @@ import (
 
 	"github.com/zvdv/ECSS-Lockers/internal/database"
 	"github.com/zvdv/ECSS-Lockers/internal/logger"
+	"github.com/zvdv/ECSS-Lockers/internal/router/utils"
 	"github.com/zvdv/ECSS-Lockers/templates"
 )
 
@@ -35,8 +36,6 @@ func dash(w http.ResponseWriter, r *http.Request) {
 		panic("credential not found in protected route")
 	}
 
-	logger.Info(email)
-
 	db, lock := database.Lock()
 	defer lock.Unlock()
 
@@ -56,9 +55,9 @@ func dash(w http.ResponseWriter, r *http.Request) {
 		}
 	} else {
 		data.HasData = true
-		if err := templates.Html(w, "templates/dash.html", data); err != nil {
+		if err := templates.Html(w, "templates/dash/index.html", data); err != nil {
 			logger.Error(err.Error())
-			writeResponse(w, http.StatusInternalServerError, nil)
+			utils.WriteResponse(w, http.StatusInternalServerError, nil)
 		}
 		return
 	}
@@ -71,9 +70,9 @@ func dash(w http.ResponseWriter, r *http.Request) {
 		data.Lockers = append(data.Lockers, lockerState{locker, false})
 	}
 
-	if err := templates.Html(w, "templates/dash.html", data); err != nil {
+	if err := templates.Html(w, "templates/dash/index.html", data); err != nil {
 		logger.Error(err.Error())
-		writeResponse(w, http.StatusInternalServerError, nil)
+		utils.WriteResponse(w, http.StatusInternalServerError, nil)
 	}
 }
 
@@ -89,7 +88,7 @@ func apiLocker(w http.ResponseWriter, r *http.Request) {
 
 	lockerNum, err := strconv.ParseUint(r.FormValue("locker"), 10, 16)
 	if err != nil {
-		writeResponse(
+		utils.WriteResponse(
 			w,
 			http.StatusOK,
 			[]byte("<p class=\"text-error text-center\">Invalid locker</p>"))
@@ -129,7 +128,7 @@ func apiLocker(w http.ResponseWriter, r *http.Request) {
 
 		rows.Scan(&lockerID, &registrationID)
 		lockers = append(lockers, LockerState{
-			IsAvailable: registrationID.Valid,
+			IsAvailable: !registrationID.Valid,
 			LockerID:    lockerID,
 		})
 	}
@@ -142,14 +141,14 @@ func apiLocker(w http.ResponseWriter, r *http.Request) {
 		Lockers:  lockers,
 	}
 
-	if err := templates.Component(w, "templates/dash_locker_card.html", data); err != nil {
+	if err := templates.Component(w, "templates/dash/locker_card.html", data); err != nil {
 		panic(err)
 	}
 }
 
 func apiLockerConfirm(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPut {
-		writeResponse(w, http.StatusMethodNotAllowed, nil)
+		utils.WriteResponse(w, http.StatusMethodNotAllowed, nil)
 		return
 	}
 

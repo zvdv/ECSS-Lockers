@@ -15,7 +15,6 @@ import (
 	"github.com/zvdv/ECSS-Lockers/internal/httputil"
 	"github.com/zvdv/ECSS-Lockers/internal/logger"
 	"github.com/zvdv/ECSS-Lockers/internal/time"
-	"github.com/zvdv/ECSS-Lockers/templates"
 )
 
 type lockerState struct {
@@ -68,12 +67,16 @@ func Dash(w http.ResponseWriter, r *http.Request) {
 	} else {
 		data.HasLocker = true
 		data.ExpireAt = expiry.Format("Jan 2, 2006 at 3:04pm")
-		templates.Html(w, "templates/dash/index.html", data)
+		httputil.WriteTemplatePage(w, data,
+			"templates/dash/index.html",
+			"templates/nav.html")
 
 		return
 	}
 
-	templates.Html(w, "templates/dash/index.html", data)
+	httputil.WriteTemplatePage(w, data,
+		"templates/nav.html",
+		"templates/dash/index.html")
 }
 
 func ApiLocker(w http.ResponseWriter, r *http.Request) {
@@ -152,7 +155,7 @@ func ApiLocker(w http.ResponseWriter, r *http.Request) {
 		Lockers:  lockers,
 	}
 
-	templates.Component(w, "templates/dash/locker_card.html", data)
+	httputil.WriteTemplateComponent(w, data, "templates/dash/locker_card.html")
 }
 
 func DashLockerRegister(w http.ResponseWriter, r *http.Request) {
@@ -170,7 +173,7 @@ func DashLockerRegister(w http.ResponseWriter, r *http.Request) {
 	locker := r.FormValue("locker")
 
 	if r.Method == http.MethodGet {
-		templates.Html(w, "templates/dash/locker_register.html", locker)
+		httputil.WriteTemplateComponent(w, locker, "templates/dash/locker_register.html")
 		return
 	}
 
@@ -223,7 +226,7 @@ func DashLockerRegister(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if registrationCount != 0 {
-		templates.Component(w, "templates/dash/locker_unavailable.html", nil)
+		httputil.WriteTemplateComponent(w, nil, "templates/dash/locker_unavailable.html")
 		return
 	}
 
@@ -255,5 +258,5 @@ func DashLockerRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	templates.Component(w, "templates/dash/locker_register_ok.html", nil)
+	httputil.WriteTemplateComponent(w,nil, "templates/dash/locker_register_ok.html" )
 }

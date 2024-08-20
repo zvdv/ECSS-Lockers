@@ -10,7 +10,6 @@ import (
 	"github.com/zvdv/ECSS-Lockers/internal/httputil"
 	"github.com/zvdv/ECSS-Lockers/internal/logger"
 	"github.com/zvdv/ECSS-Lockers/internal/time"
-	"github.com/zvdv/ECSS-Lockers/templates"
 	"gopkg.in/gomail.v2"
 )
 
@@ -100,8 +99,9 @@ func Auth(w http.ResponseWriter, r *http.Request) {
 		Token: r.URL.Query().Get("token"),
 	}
 
-	w.WriteHeader(http.StatusOK)
-	templates.Html(w, "templates/auth/validate.html", data)
+	httputil.WriteTemplatePage(w, data,
+		"templates/auth/validate.html",
+		"templates/nav.html")
 }
 
 func AuthApiToken(w http.ResponseWriter, r *http.Request) {

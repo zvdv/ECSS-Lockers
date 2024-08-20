@@ -3,12 +3,14 @@ package router
 import (
 	"net/http"
 
-	"github.com/zvdv/ECSS-Lockers/templates"
+	"github.com/zvdv/ECSS-Lockers/internal/httputil"
 )
 
 func index(w http.ResponseWriter, r *http.Request) {
-	// cache for 15 mins
+	// Cache for 15 mins
 	w.Header().Add("Cache-Control", "max-age=900")
 	w.WriteHeader(http.StatusOK)
-	templates.Html(w, "templates/index.html", nil)
+
+	// Parse the template files
+	httputil.WriteTemplatePage(w, nil, "templates/index.html")
 }

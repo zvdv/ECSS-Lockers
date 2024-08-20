@@ -1,12 +1,32 @@
 package httputil
 
 import (
+	"html/template"
 	"net/http"
 
 	"github.com/zvdv/ECSS-Lockers/internal"
 	"github.com/zvdv/ECSS-Lockers/internal/crypto"
 	"github.com/zvdv/ECSS-Lockers/internal/logger"
 )
+
+func WriteTemplateComponent(w http.ResponseWriter, data interface{}, filename ...string) {
+	tmpl := template.Must(template.ParseFiles(filename...))
+
+	w.WriteHeader(http.StatusOK)
+	if err := tmpl.ExecuteTemplate(w, "base", data); err != nil {
+		logger.Error("error executing template data: %v", err)
+		WriteResponse(w, http.StatusInternalServerError, nil)
+	}
+}
+
+func WriteTemplatePage(w http.ResponseWriter, data interface{}, filename ...string) {
+	files := make([]string, 1, len(filename)+1)
+
+	files[0] = "templates/base.html"
+	files = append(files, filename...)
+
+	WriteTemplateComponent(w, data, files...)
+}
 
 func WriteResponse(w http.ResponseWriter, status int, writeData []byte) {
 	w.WriteHeader(status)

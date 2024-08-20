@@ -7,7 +7,7 @@ import (
 	"github.com/zvdv/ECSS-Lockers/templates"
 )
 
-func  index(w http.ResponseWriter, r *http.Request) {
+func index(w http.ResponseWriter, r *http.Request) {
 	// cache for 15 mins
 	w.Header().Add("Cache-Control", "max-age=900")
 	w.WriteHeader(http.StatusOK)

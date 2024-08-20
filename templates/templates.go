@@ -66,5 +66,5 @@ func Component(writer io.Writer, fileName string, data any) error {
 		return err
 	}
 
-    return tmpl.Execute(writer, data)
+	return tmpl.Execute(writer, data)
 }

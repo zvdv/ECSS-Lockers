@@ -160,7 +160,7 @@ func apiLockerConfirm(w http.ResponseWriter, r *http.Request) {
 	locker := r.FormValue("locker")
 	logger.Info(locker)
 
-    // TODO: calculate exp timestamp
+	// TODO: calculate exp timestamp
 
 	// TODO: write to db
 }

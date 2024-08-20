@@ -24,14 +24,16 @@ type lockerState struct {
 
 func Dash(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		w.WriteHeader(http.StatusMethodNotAllowed)
+        httputil.WriteResponse(w, http.StatusMethodNotAllowed, nil)
 		return
 	}
 
-	email, ok := r.Context().Value("user_email").(string)
-	if !ok {
-		logger.Fatal("credential not found in protected route")
-	}
+    email, err := httputil.ExtractUserEmail(r)
+    if err != nil {
+        logger.Error("error parsing user token: %v", err)
+        httputil.WriteResponse(w, http.StatusBadRequest, nil)
+        return
+    }
 
 	data := struct {
 		HasLocker  bool

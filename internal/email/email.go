@@ -14,7 +14,7 @@ var (
 	HostEmail   string
 )
 
-func init() {
+func Initialize() {
 	HostEmail = env.Env("EMAIL_HOST_ADDRESS")
 
 	mailDialier = gomail.NewDialer("smtp.gmail.com",

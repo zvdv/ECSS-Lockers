@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"github.com/joho/godotenv"
 	"github.com/zvdv/ECSS-Lockers/internal/crypto"
 	"github.com/zvdv/ECSS-Lockers/internal/env"
 	"github.com/zvdv/ECSS-Lockers/internal/logger"
@@ -12,11 +11,7 @@ var (
 	CipherKey []byte
 )
 
-func Init() {
-	if err := godotenv.Load(); err != nil {
-		logger.Warn("failed to load env variables: %v", err)
-	}
-
+func Initialize() {
 	Domain = env.Env("DOMAIN")
 
 	cipherKeyString := env.Env("CIPHER_KEY")

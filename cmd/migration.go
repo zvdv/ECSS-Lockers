@@ -3,31 +3,13 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"os"
 
 	"github.com/joho/godotenv"
 	"github.com/zvdv/ECSS-Lockers/internal/database"
 	"github.com/zvdv/ECSS-Lockers/internal/env"
 	"github.com/zvdv/ECSS-Lockers/internal/logger"
 )
-
-const schemas string = `
-CREATE TABLE IF NOT EXISTS locker (
-    id varchar(255) NOT NULL,
-    PRIMARY KEY(id)
-);
-
-CREATE TABLE IF NOT EXISTS registration (
-    locker varchar(255) NOT NULL,
-    user varchar(255) NOT NULL,
-    name varchar(255) NOT NULL,
-    expiry datetime NOT NULL,
-    expiryEmailSent boolean DEFAULT FALSE,
-    PRIMARY KEY (locker)
-);
-
-CREATE INDEX IF NOT EXISTS user_registration 
-ON registration (user);
-`
 
 func main() {
 	if err := godotenv.Load(); err != nil {
@@ -44,7 +26,12 @@ func main() {
 	db, lock := database.Lock()
 	defer lock.Unlock()
 
-	if _, err := db.Exec(schemas); err != nil {
+	schema, err := os.ReadFile("internal/database/schema.sql")
+	if err != nil {
+		logger.Fatal(err)
+	}
+
+	if _, err := db.Exec(string(schema)); err != nil {
 		logger.Fatal(err)
 	}
 

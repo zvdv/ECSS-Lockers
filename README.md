@@ -1,14 +1,23 @@
 # Lockers
 
-Built using the braindead stack of Golang, HTMX, and TailwindCSS
+Built using the braindead stack of Golang, SQLite, HTMX, and TailwindCSS. Fully SSR, etc etc.
 
 ## Getting started
 
-Tailwind server and dependencies:
+### Dependencies
+
+Tailwind build tools are the only thing of JS ecosystem that is used in this project.
+
+To install dependencies:
 
 ```sh
-npm i # install dependencies
-npm run tw # starts the tailwind "compiler"
+npm i
+```
+
+To start a Tailwind _"compiler"_:
+
+```sh
+npm run tw
 ```
 
 ### Database migration
@@ -27,11 +36,9 @@ Note: for auth cookie to work, go on your browser `http://127.0.0.1:8080`
 
 ### Environment variables
 
-```txt
-EMAIL_HOST_ADDRESS=
-EMAIL_HOST_PASSWORD=
-CIPHER_KEY=
-DOMAIN=
-DATABASE_URL=
-DATABASE_AUTH_TOKEN=
-```
+- `EMAIL_HOST_ADDRESS`: ECSS associated email
+- `EMAIL_HOST_PASSWORD`: ECSS email's App password (if using Gmail, which is likely...)
+- `CIPHER_KEY`: base64 encoding for a cipher key, run `go run cmd/keygen.go` to generate one.
+- `DOMAIN`: Hosting domain
+- `DATABASE_URL`: Turso database url
+- `DATABASE_AUTH_TOKEN`: Tursor database auth token

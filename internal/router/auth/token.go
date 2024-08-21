@@ -5,8 +5,8 @@ import (
 	"encoding/hex"
 
 	"github.com/zvdv/ECSS-Lockers/internal"
-	"github.com/zvdv/ECSS-Lockers/internal/time"
 	"github.com/zvdv/ECSS-Lockers/internal/crypto"
+	"github.com/zvdv/ECSS-Lockers/internal/time"
 )
 
 // AUTH TOKEN CONSTRUCTION

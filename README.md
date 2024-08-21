@@ -1,15 +1,23 @@
 # Lockers
 
+Built using the braindead stack of Golang, HTMX, and TailwindCSS
+
 ## Getting started
 
 Tailwind server and dependencies:
 
 ```sh
-npm run i # install dependencies
-npm run tw # starts a tailwind compiler
+npm i # install dependencies
+npm run tw # starts the tailwind "compiler"
 ```
 
-Starts the app
+### Database migration
+
+```sh
+go run ./cmd/migration.go
+```
+
+### Starts the app
 
 ```sh
 go run ./cmd/app.go

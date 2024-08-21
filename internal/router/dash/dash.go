@@ -9,8 +9,6 @@ import (
 
 	stdtime "time"
 
-	"github.com/zvdv/ECSS-Lockers/internal"
-	"github.com/zvdv/ECSS-Lockers/internal/crypto"
 	"github.com/zvdv/ECSS-Lockers/internal/database"
 	"github.com/zvdv/ECSS-Lockers/internal/httputil"
 	"github.com/zvdv/ECSS-Lockers/internal/logger"
@@ -28,7 +26,12 @@ func Dash(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userID := httputil.ExtractUserID(r)
+	userEmail, err := httputil.ExtractUserEmail(r)
+	if err != nil {
+		logger.Error("failed to extract user email from token: %v", err)
+		httputil.WriteResponse(w, http.StatusInternalServerError, nil)
+		return
+	}
 
 	data := struct {
 		HasLocker  bool
@@ -55,7 +58,7 @@ func Dash(w http.ResponseWriter, r *http.Request) {
 
 	var expiry stdtime.Time
 
-	err = stmt.QueryRow(sql.Named("email", userID)).Scan(&data.LockerName, &expiry)
+	err = stmt.QueryRow(sql.Named("email", userEmail)).Scan(&data.LockerName, &expiry)
 	if err != nil {
 		if !errors.Is(err, sql.ErrNoRows) {
 			logger.Error("error querying for registration: %v", err)
@@ -173,39 +176,24 @@ func DashLockerRegister(w http.ResponseWriter, r *http.Request) {
 	locker := r.FormValue("locker")
 
 	if r.Method == http.MethodGet {
-		httputil.WriteTemplateComponent(w, locker, "templates/dash/locker_register.html")
+		httputil.WriteTemplatePage(w, locker,
+			"templates/nav.html", "templates/dash/locker_register.html")
 		return
 	}
 
-	// after this go routine, `userName` is the base 64 encoded of
-	// the ciphertext produced by chacha20poly1305
 	userName := r.FormValue("name")
 
-	userID := httputil.ExtractUserID(r)
-
-	type EncryptResult struct {
-		ciphertext []byte
-		err        error
+	userEmail, err := httputil.ExtractUserEmail(r)
+	if err != nil {
+		logger.Error("error decrypting user email: %v", err)
+		httputil.WriteResponse(w, http.StatusInternalServerError, nil)
+		return
 	}
-
-	ch := make(chan EncryptResult)
-
-	go func(userEmail string, userName string, ch chan<- EncryptResult) {
-		ciphertext, err := crypto.Encrypt(
-			internal.CipherKey,
-			[]byte(userName),
-			[]byte(userEmail))
-
-		ch <- EncryptResult{ciphertext, err}
-	}(userID, userName, ch)
 
 	db, lock := database.Lock()
 	defer lock.Unlock()
 
-	var (
-		stmt *sql.Stmt
-		err  error
-	)
+	var stmt *sql.Stmt
 
 	stmt, err = db.Prepare(`
         SELECT COUNT(*) 
@@ -238,18 +226,12 @@ func DashLockerRegister(w http.ResponseWriter, r *http.Request) {
 		logger.Fatal(err)
 	}
 
-	encryptResult := <-ch
-	if encryptResult.err != nil {
-		logger.Error("failed to encrypt plaintext: %v", encryptResult.err)
-		httputil.WriteResponse(w, http.StatusInternalServerError, nil)
-	}
-
 	expiryDate := time.NextExpiryDate(time.Now())
 
 	_, err = stmt.Exec(
 		sql.Named("locker", locker),
-		sql.Named("user", userID),
-		sql.Named("name", crypto.Base64.EncodeToString(encryptResult.ciphertext)),
+		sql.Named("user", userEmail),
+		sql.Named("name", userName),
 		sql.Named("expiry", expiryDate))
 
 	if err != nil {
@@ -258,5 +240,5 @@ func DashLockerRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	httputil.WriteTemplateComponent(w,nil, "templates/dash/locker_register_ok.html" )
+	httputil.WriteTemplateComponent(w, nil, "templates/dash/locker_register_ok.html")
 }

@@ -30,10 +30,8 @@ func AuthApiLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// validate userEmail
-	// TODO: may not have to do this? since the incoming userEmail is forced
-	// to be @uvic.ca
-	userEmail := r.FormValue("email")
-	userEmail += "@uvic.ca" // append @uvic since the input data is just netlink id
+	// append @uvic since the input data is just netlink id
+	userEmail := r.FormValue("email") + "@uvic.ca"
 	if !email.ValidUVicEmail(userEmail) {
 		data := `
             <button type="submit" class="btn btn-primary btn-block">Login</button>
@@ -138,8 +136,8 @@ func AuthApiToken(w http.ResponseWriter, r *http.Request) {
 		Domain:   internal.Domain,
 		Path:     "/",
 		MaxAge:   sessionCookieMaxAge, // good for 1 hour
-		Secure:   false,               // TODO: flip to true on prod
-		HttpOnly: false,               // TODO: flip to true on prod
+		Secure:   true,
+		HttpOnly: true,
 	}
 
 	http.SetCookie(w, &cookie)

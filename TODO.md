@@ -4,3 +4,4 @@
       in the Docker image.
 - [ ] Fixing database migration scripts
 - [ ] Cache static asset (middleware?)
+- [ ] Auth token invalidating

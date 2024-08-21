@@ -13,7 +13,7 @@ func WriteTemplateComponent(w http.ResponseWriter, data interface{}, filename ..
 	tmpl := template.Must(template.ParseFiles(filename...))
 
 	w.WriteHeader(http.StatusOK)
-	if err := tmpl.ExecuteTemplate(w, "base", data); err != nil {
+	if err := tmpl.Execute(w, data); err != nil {
 		logger.Error("error executing template data: %v", err)
 		WriteResponse(w, http.StatusInternalServerError, nil)
 	}
@@ -25,7 +25,13 @@ func WriteTemplatePage(w http.ResponseWriter, data interface{}, filename ...stri
 	files[0] = "templates/base.html"
 	files = append(files, filename...)
 
-	WriteTemplateComponent(w, data, files...)
+	tmpl := template.Must(template.ParseFiles(files...))
+
+	w.WriteHeader(http.StatusOK)
+	if err := tmpl.ExecuteTemplate(w, "base", data); err != nil {
+		logger.Error("error executing template data: %v", err)
+		WriteResponse(w, http.StatusInternalServerError, nil)
+	}
 }
 
 func WriteResponse(w http.ResponseWriter, status int, writeData []byte) {

@@ -12,7 +12,7 @@ var (
 	CipherKey []byte
 )
 
-func init() {
+func Init() {
 	if err := godotenv.Load(); err != nil {
 		logger.Warn("failed to load env variables: %v", err)
 	}

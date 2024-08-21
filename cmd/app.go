@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/zvdv/ECSS-Lockers/internal"
 	_ "github.com/zvdv/ECSS-Lockers/internal"
 	"github.com/zvdv/ECSS-Lockers/internal/database"
 	_ "github.com/zvdv/ECSS-Lockers/internal/database"
@@ -20,6 +21,8 @@ func init() {
 		env.MustEnv("DATABASE_URL"),
 		env.MustEnv("DATABASE_AUTH_TOKEN"))
 	database.Connect(dbURL)
+	internal.Init()
+
 }
 
 func main() {

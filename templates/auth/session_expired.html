@@ -1,5 +1,8 @@
-<main class="flex flex-col gap-3 justify-center items-center h-[100vh]">
-  <h1 class="text-3xl font-bold text-primary">Whoops!</h1>
-  <h2 class="text-lg font-bold">Session Expired</h2>
-  <a href="/" class="link text-sm">Login again</a>
+{{define "content"}}
+<main class="h-full grid place-items-center">
+  <div class="flex flex-col gap-3 justify-center items-center">
+    <h1 class="text-3xl font-bold text-primary">Session Expired</h1>
+    <a href="/" class="link text-sm">Login again</a>
+  </div>
 </main>
+{{end}}

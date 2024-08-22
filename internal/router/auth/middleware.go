@@ -17,7 +17,7 @@ var (
 
 func AuthenticatedUserOnly(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		cookie, err := r.Cookie("session")
+        cookie, err := r.Cookie(string(httputil.SessionID))
 		if err != nil {
 			httputil.WriteTemplatePage(w, nil,
 				"templates/auth/session_expired.html", "templates/nav.html")

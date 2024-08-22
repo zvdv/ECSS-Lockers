@@ -66,12 +66,12 @@ func TestHMAC(t *testing.T) {
 	}
 
 	disgest[8] ^= 1 // flip a bit
-    ok, err = crypto.VerifyHMAC(key, message, disgest)
-    if err != nil {
-        t.Fatal(err)
-    }
+	ok, err = crypto.VerifyHMAC(key, message, disgest)
+	if err != nil {
+		t.Fatal(err)
+	}
 
-    if ok {
-        t.Fail()
-    }
+	if ok {
+		t.Fail()
+	}
 }

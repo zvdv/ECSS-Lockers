@@ -4,7 +4,7 @@ import (
 	"crypto/rand"
 	"testing"
 
-	"github.com/zvdv/ECSS-Lockers/internal"
+	"github.com/zvdv/ECSS-Lockers/internal/crypto"
 	"github.com/zvdv/ECSS-Lockers/internal/router/auth"
 )
 
@@ -14,7 +14,7 @@ func TestTokenMaker(t *testing.T) {
 		panic(err)
 	}
 
-	internal.CipherKey = key[:]
+	crypto.CipherKey = key
 
 	email := "halnguyen@uvic.ca"
 	tok, err := auth.MakeTokenFromEmail(email)

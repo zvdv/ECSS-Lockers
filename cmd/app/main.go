@@ -23,7 +23,9 @@ import (
 const addr string = "127.0.0.1:8080"
 
 func init() {
-	godotenv.Load()
+	if err := godotenv.Load(); err != nil {
+		logger.Fatal(err)
+	}
 
 	dbURL := fmt.Sprintf(
 		"%s?authToken=%s",
@@ -32,7 +34,7 @@ func init() {
 	database.Connect(dbURL)
 	internal.Initialize()
 	email.Initialize()
-    crypto.Initialize()
+	crypto.Initialize()
 }
 
 func main() {

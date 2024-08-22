@@ -8,7 +8,7 @@ import (
 )
 
 func makeBuffer(n int) []byte {
-	payload := make([]byte, n, n)
+	payload := make([]byte, n)
 	if _, err := rand.Read(payload); err != nil {
 		panic(err)
 	}

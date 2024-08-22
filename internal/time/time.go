@@ -14,7 +14,7 @@ func init() {
 	var err error
 	loc, err = stdtime.LoadLocation("Canada/Pacific")
 	if err != nil {
-		logger.Fatal(err)
+		logger.Error.Fatal(err)
 	}
 }
 

@@ -112,7 +112,7 @@ func AuthApiToken(w http.ResponseWriter, r *http.Request) {
 
 	email, ts, err := ParseToken(token)
 	if err != nil {
-		logger.Error("Failed to parse token:\n%v", err)
+		logger.Error.Printf("Failed to parse token:\n%v\n", err)
 		httputil.WriteResponse(w, http.StatusInternalServerError, nil)
 		return
 	}
@@ -127,7 +127,7 @@ func AuthApiToken(w http.ResponseWriter, r *http.Request) {
 	// cipher email, that will be the auth token
 	cookieValue, err := crypto.Encrypt(crypto.CipherKey[:], []byte(email), nil)
 	if err != nil {
-		logger.Error("error encrypting email: %v", err)
+		logger.Error.Printf("error encrypting email: %v\n", err)
 		httputil.WriteResponse(w, http.StatusInternalServerError, nil)
 		return
 	}
@@ -147,7 +147,7 @@ func AuthApiToken(w http.ResponseWriter, r *http.Request) {
 	// sign hmac with plaintext email
 	digest, err := crypto.SignHMAC(crypto.HMACKey[:], []byte(email), nil)
 	if err != nil {
-		logger.Error("error signing token: %v", err)
+		logger.Error.Printf("error signing token: %v\n", err)
 		httputil.WriteResponse(w, http.StatusInternalServerError, nil)
 		return
 	}

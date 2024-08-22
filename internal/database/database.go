@@ -18,10 +18,10 @@ func Connect(dbURL string) {
 
 	db, err = sql.Open("libsql", dbURL)
 	if err != nil {
-		logger.Fatal(err)
+		logger.Error.Fatal(err)
 	}
 
-	logger.Info("Connected to database")
+	logger.Info.Println("Connected to database")
 
 	dbLock = new(sync.Mutex)
 }

@@ -28,7 +28,7 @@ func Dash(w http.ResponseWriter, r *http.Request) {
 
 	userEmail, err := httputil.ExtractUserEmail(r)
 	if err != nil {
-		logger.Error("failed to extract user email from token: %v", err)
+		logger.Error.Printf("failed to extract user email from token: %v\n", err)
 		httputil.WriteResponse(w, http.StatusInternalServerError, nil)
 		return
 	}
@@ -53,7 +53,7 @@ func Dash(w http.ResponseWriter, r *http.Request) {
         LIMIT 1;`)
 
 	if err != nil {
-		logger.Fatal(err)
+		logger.Error.Fatal(err)
 	}
 
 	var expiry stdtime.Time
@@ -61,7 +61,7 @@ func Dash(w http.ResponseWriter, r *http.Request) {
 	err = stmt.QueryRow(sql.Named("email", userEmail)).Scan(&data.LockerName, &expiry)
 	if err != nil {
 		if !errors.Is(err, sql.ErrNoRows) {
-			logger.Error("error querying for registration: %v", err)
+			logger.Error.Printf("error querying for registration: %v\n", err)
 			httputil.WriteResponse(w, http.StatusInternalServerError, nil)
 
 			return
@@ -89,7 +89,7 @@ func ApiLocker(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := r.ParseForm(); err != nil {
-		logger.Error("failed to parse form: %v", err)
+		logger.Error.Printf("failed to parse form: %v\n", err)
 		httputil.WriteResponse(w, http.StatusInternalServerError, nil)
 		return
 	}
@@ -121,7 +121,7 @@ func ApiLocker(w http.ResponseWriter, r *http.Request) {
         LIKE ?;`)
 
 	if err != nil {
-		logger.Fatal("stmt error:", err)
+		logger.Error.Fatal("stmt error:", err)
 	}
 
 	locker = fmt.Sprintf("%%ELW %d%%", lockerNum)
@@ -139,7 +139,7 @@ func ApiLocker(w http.ResponseWriter, r *http.Request) {
 		)
 
 		if err := rows.Scan(&lockerID, &registrationID); err != nil {
-			logger.Error("failed to scan data: %v", err)
+			logger.Error.Printf("failed to scan data: %v\n", err)
 			httputil.WriteResponse(w, http.StatusInternalServerError, nil)
 			return
 		}
@@ -168,7 +168,7 @@ func DashLockerRegister(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := r.ParseForm(); err != nil {
-		logger.Error("error parsing form: %v", err)
+		logger.Error.Printf("error parsing form: %v\n", err)
 		httputil.WriteResponse(w, http.StatusBadRequest, nil)
 		return
 	}
@@ -185,7 +185,7 @@ func DashLockerRegister(w http.ResponseWriter, r *http.Request) {
 
 	userEmail, err := httputil.ExtractUserEmail(r)
 	if err != nil {
-		logger.Error("error decrypting user email: %v", err)
+		logger.Error.Printf("error decrypting user email: %v\n", err)
 		httputil.WriteResponse(w, http.StatusInternalServerError, nil)
 		return
 	}
@@ -201,14 +201,14 @@ func DashLockerRegister(w http.ResponseWriter, r *http.Request) {
         WHERE locker = :locker;`)
 
 	if err != nil {
-		logger.Fatal(err)
+		logger.Error.Fatal(err)
 	}
 
 	var registrationCount uint8
 
 	err = stmt.QueryRow(sql.Named("locker", locker)).Scan(&registrationCount)
 	if err != nil {
-		logger.Error("error querying for locker: %v", err)
+		logger.Error.Printf("error querying for locker: %v\n", err)
 		httputil.WriteResponse(w, http.StatusInternalServerError, nil)
 		return
 	}
@@ -223,7 +223,7 @@ func DashLockerRegister(w http.ResponseWriter, r *http.Request) {
         VALUES (:locker, :user, :name, :expiry);`)
 
 	if err != nil {
-		logger.Fatal(err)
+		logger.Error.Fatal(err)
 	}
 
 	expiryDate := time.NextExpiryDate(time.Now())
@@ -235,7 +235,7 @@ func DashLockerRegister(w http.ResponseWriter, r *http.Request) {
 		sql.Named("expiry", expiryDate))
 
 	if err != nil {
-		logger.Error("error writing registration to db: %v", err)
+		logger.Error.Printf("error writing registration to db: %v\n", err)
 		httputil.WriteResponse(w, http.StatusInternalServerError, nil)
 		return
 	}

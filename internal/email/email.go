@@ -37,6 +37,6 @@ func ValidUVicEmail(email string) bool {
 	if err == nil {
 		return strings.HasSuffix(email, "@uvic.ca")
 	}
-	logger.Error("Invalid email %s:\n%v", email, err)
+	logger.Error.Printf("Invalid email %s:\n%v\n", email, err)
 	return false
 }

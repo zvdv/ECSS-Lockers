@@ -20,7 +20,7 @@ func WriteTemplateComponent(w http.ResponseWriter, data interface{}, filename ..
 
 	w.WriteHeader(http.StatusOK)
 	if err := tmpl.Execute(w, data); err != nil {
-		logger.Error("error executing template data: %v", err)
+		logger.Error.Printf("error executing template data: %v\n", err)
 		WriteResponse(w, http.StatusInternalServerError, nil)
 	}
 }
@@ -35,7 +35,7 @@ func WriteTemplatePage(w http.ResponseWriter, data interface{}, filename ...stri
 
 	w.WriteHeader(http.StatusOK)
 	if err := tmpl.ExecuteTemplate(w, "base", data); err != nil {
-		logger.Error("error executing template data: %v", err)
+		logger.Error.Printf("error executing template data: %v\n", err)
 		WriteResponse(w, http.StatusInternalServerError, nil)
 	}
 }
@@ -44,7 +44,7 @@ func WriteResponse(w http.ResponseWriter, status int, writeData []byte) {
 	w.WriteHeader(status)
 	if writeData != nil {
 		if _, err := w.Write(writeData); err != nil {
-			logger.Error("failed to write response: %s", err)
+			logger.Error.Printf("failed to write response: %s\n", err)
 		}
 	}
 }
@@ -52,7 +52,7 @@ func WriteResponse(w http.ResponseWriter, status int, writeData []byte) {
 func ExtractUserID(r *http.Request) string {
 	sessionID, ok := r.Context().Value(SessionID).(string)
 	if !ok {
-		logger.Fatal("ExtractUserID called from an unprotected route")
+		logger.Error.Fatal("ExtractUserID called from an unprotected route")
 	}
 
 	return sessionID

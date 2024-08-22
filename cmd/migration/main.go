@@ -13,10 +13,10 @@ import (
 
 func main() {
 	if err := godotenv.Load(); err != nil {
-		logger.Fatal(err)
+		logger.Error.Fatal(err)
 	}
 
-	logger.Info("DATABASE MIGRATION")
+	logger.Info.Println("DATABASE MIGRATION")
 
 	database.Connect(fmt.Sprintf(
 		"%s?authToken=%s",
@@ -28,16 +28,16 @@ func main() {
 
 	schema, err := os.ReadFile("internal/database/schema.sql")
 	if err != nil {
-		logger.Fatal(err)
+		logger.Error.Fatal(err)
 	}
 
 	if _, err := db.Exec(string(schema)); err != nil {
-		logger.Fatal(err)
+		logger.Error.Fatal(err)
 	}
 
-	logger.Info("created schema.")
+	logger.Info.Println("created schema.")
 
-	logger.Info("seeding 200 lockers..")
+	logger.Info.Println("seeding 200 lockers..")
 	// eeehhh i'm not proud of how this is being done but
 	// database/sql does not support array type for query
 	// arg out of the box :(
@@ -46,14 +46,14 @@ func main() {
 
 		stmt, err := db.Prepare(`INSERT INTO locker (id) VALUES (:id);`)
 		if err != nil {
-			logger.Fatal(err)
+			logger.Error.Fatal(err)
 		}
 
 		_, err = stmt.Exec(sql.Named("id", locker))
 		if err != nil {
-			logger.Error("error seeding locker %s:\n%v", locker, err)
+			logger.Error.Println("error seeding locker %s:\n%v", locker, err)
 		}
 	}
 
-	logger.Info("Done")
+	logger.Info.Println("Done")
 }

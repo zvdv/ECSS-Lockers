@@ -10,7 +10,7 @@ import (
 func MustEnv(key string) string {
 	value := os.Getenv(key)
 	if len(value) == 0 {
-		logger.Fatal(fmt.Sprintf("environment variable not set: %s", key))
+		logger.Error.Fatal(fmt.Sprintf("environment variable not set: %s", key))
 	}
 	return value
 }
@@ -18,7 +18,7 @@ func MustEnv(key string) string {
 func Env(key string) string {
 	value := os.Getenv(key)
 	if len(value) == 0 {
-		logger.Trace("environment variable not set: %s", key)
+		logger.Trace.Println("environment variable not set: %s", key)
 	}
 	return value
 }

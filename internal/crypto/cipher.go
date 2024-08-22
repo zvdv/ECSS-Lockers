@@ -39,10 +39,10 @@ func getKey(key string, buf []byte) {
 func Initialize() {
 	cipherkey, err := Base64.DecodeString(env.MustEnv("CIPHER_KEY"))
 	if err != nil {
-		logger.Fatal("error decoding cipherkey:", err)
+		logger.Error.Fatal("error decoding cipherkey:", err)
 	}
 	if len(cipherkey) != 32 {
-		logger.Fatal("invalid key length")
+		logger.Error.Fatal("invalid key length")
 	}
 
 	getKey("HMAC_KEY", HMACKey[:])

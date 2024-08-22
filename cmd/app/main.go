@@ -24,7 +24,7 @@ const addr string = "127.0.0.1:8080"
 
 func init() {
 	if err := godotenv.Load(); err != nil {
-		logger.Fatal(err)
+		logger.Error.Fatal(err)
 	}
 
 	dbURL := fmt.Sprintf(
@@ -60,9 +60,9 @@ func main() {
 		r.Handle("/api/locker", http.HandlerFunc(dash.ApiLocker))
 	})
 
-	logger.Info("Listening at http://%s", addr)
-	logger.Info("for local dev, use http://127.0.0.1:8080, for more information, see: https://stackoverflow.com/a/1188145/19114163")
-	logger.Fatal(http.ListenAndServe(addr, app))
+	logger.Info.Printf("Listening at http://%s\n", addr)
+	logger.Info.Println("for local dev, use http://127.0.0.1:8080, for more information, see: https://stackoverflow.com/a/1188145/19114163")
+	logger.Error.Fatal(http.ListenAndServe(addr, app))
 }
 
 func requestLogger(next http.Handler) http.Handler {
@@ -81,7 +81,7 @@ func requestLogger(next http.Handler) http.Handler {
 			statusString = color.RedString("%d", statusCode)
 		}
 
-		logger.Trace("%s %s %s from %s - %s %dB in %v",
+		logger.Trace.Printf("%s %s %s from %s - %s %dB in %v\n",
 			r.Method,
 			url,
 			r.Proto,

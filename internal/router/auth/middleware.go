@@ -17,7 +17,7 @@ var (
 
 func AuthenticatedUserOnly(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-        cookie, err := r.Cookie(string(httputil.SessionID))
+		cookie, err := r.Cookie(string(httputil.SessionID))
 		if err != nil {
 			httputil.WriteTemplatePage(w, nil,
 				"templates/auth/session_expired.html", "templates/nav.html")
@@ -49,17 +49,17 @@ func CRSFMiddleware(next http.Handler) http.Handler {
 		ok, err := signatureOK(r)
 		if err != nil {
 			httputil.WriteResponse(w, http.StatusForbidden, nil)
-			logger.Error("%v", err)
-            return
+			logger.Error.Println(err)
+			return
 		}
 
 		if !ok {
 			httputil.WriteResponse(w, http.StatusForbidden, nil)
-			logger.Warn("invalid signature")
-            return
+			logger.Warn.Println("invalid signature")
+			return
 		}
 
-        next.ServeHTTP(w, r)
+		next.ServeHTTP(w, r)
 	})
 }
 

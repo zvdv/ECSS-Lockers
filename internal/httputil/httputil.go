@@ -4,7 +4,6 @@ import (
 	"html/template"
 	"net/http"
 
-	"github.com/zvdv/ECSS-Lockers/internal"
 	"github.com/zvdv/ECSS-Lockers/internal/crypto"
 	"github.com/zvdv/ECSS-Lockers/internal/logger"
 )
@@ -60,7 +59,7 @@ func ExtractUserEmail(r *http.Request) (string, error) {
 		return "", err
 	}
 
-	email, err := crypto.Decrypt(internal.CipherKey, sessionID, nil)
+	email, err := crypto.Decrypt(crypto.CipherKey[:], sessionID, nil)
 	if err != nil {
 		return "", err
 	}

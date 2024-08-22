@@ -4,7 +4,6 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 
-	"github.com/zvdv/ECSS-Lockers/internal"
 	"github.com/zvdv/ECSS-Lockers/internal/crypto"
 	"github.com/zvdv/ECSS-Lockers/internal/time"
 )
@@ -22,7 +21,7 @@ func MakeTokenFromEmail(email string) (string, error) {
 	binary.BigEndian.PutUint64(buf[:8], uint64(time.Now().Unix()))
 	copy(buf[8:], email)
 
-	ciphertext, err := crypto.Encrypt(internal.CipherKey, buf, nil)
+	ciphertext, err := crypto.Encrypt(crypto.CipherKey[:], buf, nil)
 	if err != nil {
 		return "", err
 	}
@@ -37,7 +36,7 @@ func ParseToken(token string) (string, uint64, error) {
 		return "", 0, err
 	}
 
-	pt, err := crypto.Decrypt(internal.CipherKey, decodedTokenBytes, nil)
+	pt, err := crypto.Decrypt(crypto.CipherKey[:], decodedTokenBytes, nil)
 	if err != nil {
 		return "", 0, err
 	}

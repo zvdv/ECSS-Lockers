@@ -10,6 +10,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/joho/godotenv"
 	"github.com/zvdv/ECSS-Lockers/internal"
+	"github.com/zvdv/ECSS-Lockers/internal/crypto"
 	"github.com/zvdv/ECSS-Lockers/internal/database"
 	"github.com/zvdv/ECSS-Lockers/internal/email"
 	"github.com/zvdv/ECSS-Lockers/internal/env"
@@ -31,6 +32,7 @@ func init() {
 	database.Connect(dbURL)
 	internal.Initialize()
 	email.Initialize()
+    crypto.Initialize()
 }
 
 func main() {

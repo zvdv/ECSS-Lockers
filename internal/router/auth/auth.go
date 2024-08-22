@@ -125,7 +125,7 @@ func AuthApiToken(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// cipher email, that will be the auth token
-	cookieValue, err := crypto.Encrypt(internal.CipherKey, []byte(email), nil)
+	cookieValue, err := crypto.Encrypt(crypto.CipherKey[:], []byte(email), nil)
 	if err != nil {
 		panic(err)
 	}

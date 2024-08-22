@@ -11,7 +11,8 @@ import (
 type ContextString string
 
 const (
-    SessionID ContextString = "session_id"
+	SessionID ContextString = "session_id"
+	Token     ContextString = "token"
 )
 
 func WriteTemplateComponent(w http.ResponseWriter, data interface{}, filename ...string) {

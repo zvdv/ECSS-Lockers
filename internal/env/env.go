@@ -1,7 +1,6 @@
 package env
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/zvdv/ECSS-Lockers/internal/logger"
@@ -10,7 +9,7 @@ import (
 func MustEnv(key string) string {
 	value := os.Getenv(key)
 	if len(value) == 0 {
-		logger.Error.Fatal(fmt.Sprintf("environment variable not set: %s", key))
+		logger.Error.Fatalf("environment variable not set: %s\n", key)
 	}
 	return value
 }
@@ -18,7 +17,7 @@ func MustEnv(key string) string {
 func Env(key string) string {
 	value := os.Getenv(key)
 	if len(value) == 0 {
-		logger.Trace.Println("environment variable not set: %s", key)
+		logger.Trace.Printf("environment variable not set: %s\n", key)
 	}
 	return value
 }

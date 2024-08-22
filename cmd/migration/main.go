@@ -51,7 +51,7 @@ func main() {
 
 		_, err = stmt.Exec(sql.Named("id", locker))
 		if err != nil {
-			logger.Error.Println("error seeding locker %s:\n%v", locker, err)
+			logger.Error.Printf("error seeding locker %s:\n%v", locker, err)
 		}
 	}
 

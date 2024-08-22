@@ -16,7 +16,12 @@ func AuthenticatedUserOnly(next http.Handler) http.Handler {
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), "session_id", cookie.Value)
+		ctx := context.WithValue(r.Context(), httputil.SessionID, cookie.Value)
 		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+func CRSFMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	})
 }

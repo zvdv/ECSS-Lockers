@@ -127,15 +127,36 @@ func AuthApiToken(w http.ResponseWriter, r *http.Request) {
 	// cipher email, that will be the auth token
 	cookieValue, err := crypto.Encrypt(crypto.CipherKey[:], []byte(email), nil)
 	if err != nil {
-		panic(err)
+		logger.Error("error encrypting email: %v", err)
+		httputil.WriteResponse(w, http.StatusInternalServerError, nil)
+		return
 	}
 
 	cookie := http.Cookie{
-		Name:     "session",
+		Name:     string(httputil.SessionID),
 		Value:    crypto.Base64.EncodeToString(cookieValue),
 		Domain:   internal.Domain,
 		Path:     "/",
 		MaxAge:   sessionCookieMaxAge, // good for 1 hour
+		Secure:   true,
+		HttpOnly: true,
+	}
+
+	http.SetCookie(w, &cookie)
+
+	// sign hmac with plaintext email
+	digest, err := crypto.SignHMAC(crypto.HMACKey[:], []byte(email), nil)
+	if err != nil {
+		logger.Error("error signing token: %v", err)
+		httputil.WriteResponse(w, http.StatusInternalServerError, nil)
+		return
+	}
+
+	cookie = http.Cookie{
+		Name:     "token",
+		Value:    crypto.Base64.EncodeToString(digest),
+		Path:     "/",
+		Domain:   internal.Domain,
 		Secure:   true,
 		HttpOnly: true,
 	}

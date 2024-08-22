@@ -8,6 +8,12 @@ import (
 	"github.com/zvdv/ECSS-Lockers/internal/logger"
 )
 
+type ContextString string
+
+const (
+    SessionID ContextString = "session_id"
+)
+
 func WriteTemplateComponent(w http.ResponseWriter, data interface{}, filename ...string) {
 	tmpl := template.Must(template.ParseFiles(filename...))
 
@@ -43,9 +49,9 @@ func WriteResponse(w http.ResponseWriter, status int, writeData []byte) {
 }
 
 func ExtractUserID(r *http.Request) string {
-	sessionID, ok := r.Context().Value("session_id").(string)
+	sessionID, ok := r.Context().Value(SessionID).(string)
 	if !ok {
-		logger.Fatal("ExtractUserToken called from an unprotected route")
+		logger.Fatal("ExtractUserID called from an unprotected route")
 	}
 
 	return sessionID

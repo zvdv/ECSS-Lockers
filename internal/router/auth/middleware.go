@@ -79,7 +79,7 @@ func signatureOK(r *http.Request) (bool, error) {
 		return false, err
 	}
 
-	return crypto.VerifyHMAC(crypto.HMACKey[:], email, digest)
+	return crypto.VerifyHMAC(crypto.SignatureKey[:], email, digest)
 }
 
 func getBytesFromCookie(r *http.Request, cookieKey string) ([]byte, error) {

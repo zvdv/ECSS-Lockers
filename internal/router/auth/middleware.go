@@ -19,8 +19,7 @@ func AuthenticatedUserOnly(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		cookie, err := r.Cookie(string(httputil.SessionID))
 		if err != nil {
-			httputil.WriteTemplatePage(w, nil,
-				"templates/auth/session_expired.html", "templates/nav.html")
+			w.Header().Add("HX-Redirect", "/sessionexpired")
 			return
 		}
 
@@ -34,7 +33,7 @@ func CRSFMiddleware(next http.Handler) http.Handler {
 		dstURL := r.URL.String()
 
 		if strings.EqualFold(dstURL, "/") ||
-			strings.Contains(r.URL.Host, "/auth/") {
+			strings.Contains(dstURL, "/auth/") {
 			next.ServeHTTP(w, r)
 			return
 		}
@@ -48,14 +47,14 @@ func CRSFMiddleware(next http.Handler) http.Handler {
 		// get digest
 		ok, err := signatureOK(r)
 		if err != nil {
-			httputil.WriteResponse(w, http.StatusForbidden, nil)
 			logger.Error.Println(err)
+			w.Header().Add("HX-Redirect", "/sessionexpired")
 			return
 		}
 
 		if !ok {
-			httputil.WriteResponse(w, http.StatusForbidden, nil)
 			logger.Warn.Println("invalid signature")
+			w.Header().Add("HX-Redirect", "/sessionexpired")
 			return
 		}
 

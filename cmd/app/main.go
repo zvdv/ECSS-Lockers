@@ -43,9 +43,11 @@ func main() {
 	app.Use(middleware.RealIP)
 	app.Use(requestLogger)
 	app.Use(middleware.Recoverer)
+	app.Use(auth.CRSFMiddleware)
 
 	app.Handle("/assets/*", http.StripPrefix("/assets/", http.FileServer(http.Dir("assets"))))
 	app.Handle("/", http.HandlerFunc(router.Home))
+	app.Handle("/sessionexpired", http.HandlerFunc(router.SessionExpired))
 
 	app.Route("/auth", func(r chi.Router) {
 		r.Handle("/", http.HandlerFunc(auth.Auth))

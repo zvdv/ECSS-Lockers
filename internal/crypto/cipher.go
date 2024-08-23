@@ -4,7 +4,6 @@ import (
 	"crypto/hmac"
 	"crypto/rand"
 	"encoding/base64"
-	"hash"
 
 	"github.com/zvdv/ECSS-Lockers/internal/env"
 	"github.com/zvdv/ECSS-Lockers/internal/logger"
@@ -20,7 +19,10 @@ import (
 //
 // though this can be changed in the future, since it's used to derive a key for
 // CSRF tokens, which are short-lived.
-const kdfContextString string = "ECSS Lockers Registration 2024-08-23 11:36:07 Signature"
+const (
+	kdfContextString string = "ECSS Lockers Registration 2024-08-23 11:36:07 Signature"
+	signatureSize    int    = 32
+)
 
 var (
 	Base64 = base64.RawStdEncoding
@@ -79,20 +81,14 @@ func Decrypt(key, payload, aad []byte) ([]byte, error) {
 	return aead.Open(nil, nonce, ciphertext, aad)
 }
 
-func makeHash() hash.Hash {
-	// 32 is the default digest size
-	return blake3.New(32, nil)
-}
-
 // if you want to append the digest to the end of the message
 // pass, call:
 //
 // `Sign(key, message, message)`
-func SignHMAC(key, message, buf []byte) ([]byte, error) {
+func SignMessage(key, message, buf []byte) ([]byte, error) {
 	var err error
 
-	hash := hmac.New(makeHash, key)
-
+	hash := blake3.New(signatureSize, SignatureKey[:])
 	_, err = hash.Write(message)
 	if err != nil {
 		return nil, err
@@ -101,8 +97,8 @@ func SignHMAC(key, message, buf []byte) ([]byte, error) {
 	return hash.Sum(buf), nil
 }
 
-func VerifyHMAC(key, message, mac []byte) (bool, error) {
-	hash := hmac.New(makeHash, key)
+func VerifySignature(key, message, mac []byte) (bool, error) {
+	hash := blake3.New(signatureSize, SignatureKey[:])
 
 	if _, err := hash.Write(message); err != nil {
 		return false, err

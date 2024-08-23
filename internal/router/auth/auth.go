@@ -145,7 +145,7 @@ func AuthApiToken(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &cookie)
 
 	// sign hmac with plaintext email
-	digest, err := crypto.SignHMAC(crypto.SignatureKey[:], []byte(email), nil)
+	digest, err := crypto.SignMessage(crypto.SignatureKey[:], []byte(email), nil)
 	if err != nil {
 		logger.Error.Printf("error signing token: %v\n", err)
 		httputil.WriteResponse(w, http.StatusInternalServerError, nil)

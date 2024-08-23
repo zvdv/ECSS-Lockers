@@ -51,12 +51,12 @@ func TestHMAC(t *testing.T) {
 
 	message := makeBuffer(128)
 
-	disgest, err := crypto.SignHMAC(key, message, nil)
+	disgest, err := crypto.SignMessage(key, message, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	ok, err := crypto.VerifyHMAC(key, message, disgest)
+	ok, err := crypto.VerifySignature(key, message, disgest)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -66,7 +66,7 @@ func TestHMAC(t *testing.T) {
 	}
 
 	disgest[8] ^= 1 // flip a bit
-	ok, err = crypto.VerifyHMAC(key, message, disgest)
+	ok, err = crypto.VerifySignature(key, message, disgest)
 	if err != nil {
 		t.Fatal(err)
 	}

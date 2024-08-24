@@ -42,3 +42,5 @@ Note: for auth cookie to work, go on your browser `http://127.0.0.1:8080`
 - `DOMAIN`: Hosting domain
 - `DATABASE_URL`: Turso database url
 - `DATABASE_AUTH_TOKEN`: Tursor database auth token
+- `ADMIN_USERNAME`: admin username
+- `ADMIN_PASSWORD`: admin password

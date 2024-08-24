@@ -23,6 +23,11 @@ func AuthenticatedUserOnly(next http.Handler) http.Handler {
 			return
 		}
 
+		if err := cookie.Valid(); err != nil {
+			w.Header().Add("HX-Redirect", "/sessionexpired")
+			return
+		}
+
 		ctx := context.WithValue(r.Context(), httputil.SessionID, cookie.Value)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})

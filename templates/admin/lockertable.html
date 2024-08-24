@@ -1,0 +1,46 @@
+{{define "lockertable"}}
+<script>
+  document.addEventListener("htmx:afterRequest", function (event) {
+    if (event.detail.xhr.status === 204) {
+      const tr = event.target.closest("tr");
+      if (tr) tr.remove();
+    }
+  });
+</script>
+
+<div class="overflow-x-auto h-max max-h-[60vh] overflow-y-scroll">
+  <table class="table table-zebra">
+    <thead>
+      <tr>
+        <th></th>
+        <th>Locker</th>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Expires on</th>
+        <th></th>
+      </tr>
+    </thead>
+
+    <tbody class="h-2 overflow-y-scroll">
+      {{range $reg := .Registrations}}
+      <tr>
+        <form hx-delete="/admin/registration">
+          <th class="text-primary">{{$reg.RowIndex}}</th>
+          <td>{{$reg.Locker}}</td>
+          <td>{{$reg.Name}}</td>
+          <td>{{$reg.Email}}</td>
+          <td>{{$reg.Expiry}}</td>
+          <td>
+            <input type="hidden" name="locker" value="{{$reg.Locker}}" />
+            <button class="btn btn-outline btn-error btn-sm" type="submit">
+              remove
+            </button>
+          </td>
+        </form>
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+</div>
+
+{{end}}

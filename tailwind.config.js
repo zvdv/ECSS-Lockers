@@ -18,6 +18,7 @@ export default {
         themes: [
             {
                 ess: {
+          ...require("daisyui/src/theming/themes")["light"],
                     primary: "#E88419",
                     secondary: "#ff931e",
                     info: "#de7a0f",

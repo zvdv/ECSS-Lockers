@@ -16,6 +16,7 @@ import (
 	"github.com/zvdv/ECSS-Lockers/internal/env"
 	"github.com/zvdv/ECSS-Lockers/internal/logger"
 	"github.com/zvdv/ECSS-Lockers/internal/router"
+	"github.com/zvdv/ECSS-Lockers/internal/router/admin"
 	"github.com/zvdv/ECSS-Lockers/internal/router/auth"
 	"github.com/zvdv/ECSS-Lockers/internal/router/dash"
 )
@@ -35,6 +36,7 @@ func init() {
 	internal.Initialize()
 	email.Initialize()
 	crypto.Initialize()
+	admin.Initialize()
 }
 
 func main() {
@@ -43,7 +45,6 @@ func main() {
 	app.Use(middleware.RealIP)
 	app.Use(requestLogger)
 	app.Use(middleware.Recoverer)
-	app.Use(auth.CRSFMiddleware)
 
 	app.Handle("/assets/*", http.StripPrefix("/assets/", http.FileServer(http.Dir("assets"))))
 	app.Handle("/", http.HandlerFunc(router.Home))
@@ -51,15 +52,24 @@ func main() {
 
 	app.Route("/auth", func(r chi.Router) {
 		r.Handle("/", http.HandlerFunc(auth.Auth))
+		r.Handle("/admin", http.HandlerFunc(admin.Auth))
 		r.Handle("/api/login", http.HandlerFunc(auth.AuthApiLogin))
 		r.Handle("/api/token", http.HandlerFunc(auth.AuthApiToken))
 	})
 
 	app.Route("/dash", func(r chi.Router) {
+		r.Use(auth.CRSFMiddleware)
 		r.Use(auth.AuthenticatedUserOnly)
 		r.Handle("/", http.HandlerFunc(dash.Dash))
 		r.Handle("/locker/register", http.HandlerFunc(dash.DashLockerRegister))
 		r.Handle("/api/locker", http.HandlerFunc(dash.ApiLocker))
+	})
+
+	app.Route("/admin", func(r chi.Router) {
+		r.Use(admin.AdminTokenChecker)
+		r.Handle("/", http.HandlerFunc(admin.Home))
+		r.Handle("/registration", http.HandlerFunc(admin.Registrations))
+		r.Handle("/registration/export", http.HandlerFunc(admin.Export))
 	})
 
 	logger.Info.Printf("Listening at http://%s\n", addr)

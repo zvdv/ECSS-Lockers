@@ -21,7 +21,7 @@ import (
 // CSRF tokens, which are short-lived.
 const (
 	kdfContextString string = "ECSS Lockers Registration 2024-08-23 11:36:07 Signature"
-	signatureSize    int    = 32
+	SignatureSize    int    = 32
 )
 
 var (
@@ -88,7 +88,7 @@ func Decrypt(key, payload, aad []byte) ([]byte, error) {
 func SignMessage(key, message, buf []byte) ([]byte, error) {
 	var err error
 
-	hash := blake3.New(signatureSize, SignatureKey[:])
+	hash := blake3.New(SignatureSize, SignatureKey[:])
 	_, err = hash.Write(message)
 	if err != nil {
 		return nil, err
@@ -98,7 +98,7 @@ func SignMessage(key, message, buf []byte) ([]byte, error) {
 }
 
 func VerifySignature(key, message, mac []byte) (bool, error) {
-	hash := blake3.New(signatureSize, SignatureKey[:])
+	hash := blake3.New(SignatureSize, SignatureKey[:])
 
 	if _, err := hash.Write(message); err != nil {
 		return false, err

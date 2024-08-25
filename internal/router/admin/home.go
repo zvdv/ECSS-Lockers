@@ -1,7 +1,6 @@
 package admin
 
 import (
-	"encoding/hex"
 	"net/http"
 	stdtime "time"
 
@@ -9,7 +8,6 @@ import (
 	"github.com/zvdv/ECSS-Lockers/internal/httputil"
 	"github.com/zvdv/ECSS-Lockers/internal/logger"
 	"github.com/zvdv/ECSS-Lockers/internal/time"
-	"lukechampine.com/blake3"
 )
 
 func Home(w http.ResponseWriter, r *http.Request) {
@@ -40,7 +38,6 @@ func Home(w http.ResponseWriter, r *http.Request) {
 }
 
 type registration struct {
-	ID         string
 	RowIndex   uint16
 	Locker     string
 	Name       string
@@ -84,14 +81,6 @@ func queryAllRegistrations() ([]registration, error) {
 		}
 
 		reg.Expiry = reg.ExpiryTime.Format(time.TimeFormatLayout)
-
-		// generate an id, for UI only
-		idHash := blake3.New(16, nil)
-		if _, err := idHash.Write([]byte(reg.Locker)); err != nil {
-			return nil, err
-		}
-
-		reg.ID = hex.EncodeToString(idHash.Sum(nil))
 
 		lockers = append(lockers, reg)
 	}

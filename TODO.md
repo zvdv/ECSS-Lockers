@@ -18,3 +18,5 @@
     - Form data `locker` should be sent, containing the locker ID (ie, `ELW 120`).
   - [x] Export: `GET /admin/api/export`
     - Exports the current `registration` table into a csv file, then self-email
+- [ ] Option to deregister locker/switch registered locker (optional)
+- [ ] Make low numbered lockers searchable without leading 0s (low priority)

@@ -7,6 +7,7 @@ import (
 	"github.com/zvdv/ECSS-Lockers/internal"
 	"github.com/zvdv/ECSS-Lockers/internal/crypto"
 	"github.com/zvdv/ECSS-Lockers/internal/email"
+	"github.com/zvdv/ECSS-Lockers/internal/env"
 	"github.com/zvdv/ECSS-Lockers/internal/httputil"
 	"github.com/zvdv/ECSS-Lockers/internal/logger"
 	"github.com/zvdv/ECSS-Lockers/internal/time"
@@ -53,7 +54,7 @@ func AuthApiLogin(w http.ResponseWriter, r *http.Request) {
 	msg.SetBody("text/html", fmt.Sprintf(emailtemplate,
 		internal.Domain,
 		tok,
-		email.HostEmail))
+		env.Env("SUPPORT_EMAIL")))
 
 	if err := email.Send(msg); err != nil {
 		panic(err)
@@ -69,15 +70,15 @@ func AuthApiLogin(w http.ResponseWriter, r *http.Request) {
 const emailtemplate string = `Hello!
 <br />
 <br />
-You recently requested to sign in to Locker Registration. Click the link below to access your account:
+You recently requested to sign in to UVic's ECSS Locker Registration. Click the link below to access your account:
 <br />
 <br />
-<a href="%sauth?token=%s">Sign In to Locker</a>
+<a href="%sauth?token=%s">Sign In to Locker Registration</a>
 <br />
 <br />
 This link will expire in 15 minutes. If you did not request this sign-in, please ignore this email.
 <br />
-If you need any help, our support team is here for you at <a href="mailto:%s">support</a>.
+If you need any help, please contact the ECSS <a href="mailto:%s">Director of IT</a>.
 <br />
 <br />
 Best regards,
@@ -120,7 +121,16 @@ func AuthApiToken(w http.ResponseWriter, r *http.Request) {
 	// token expired?
 	now := uint64(time.Now().Unix())
 	if now-ts >= tokenExpireLimit { // token expires in 15 mins
-		httputil.WriteResponse(w, http.StatusOK, []byte("token exired"))
+		httputil.WriteResponse(w, http.StatusOK, []byte(`
+            <div class="flex flex-col justify-content items-center">
+            	<span class="text-primary text-xl font-semibold">
+		            token expired
+            	</span>
+                <a href="/" class="link text-sm">
+                	Sign in again
+                </a>
+            </div>
+            `))
 		return
 	}
 

@@ -21,11 +21,14 @@ import (
 	"github.com/zvdv/ECSS-Lockers/internal/router/dash"
 )
 
-const addr string = "127.0.0.1:8080"
+const addr string = ":8080"
 
 func init() {
 	if err := godotenv.Load(); err != nil {
-		logger.Error.Fatal(err)
+		logger.Warn.Printf(`failed loading env from a file:
+	%v.
+If you're deploying, make sure the envs are set properly.
+`, err)
 	}
 
 	dbURL := fmt.Sprintf(
@@ -72,8 +75,8 @@ func main() {
 		r.Handle("/registration/export", http.HandlerFunc(admin.Export))
 	})
 
-	logger.Info.Printf("Listening at http://%s\n", addr)
-	logger.Info.Println("for local dev, use http://127.0.0.1:8080, for more information, see: https://stackoverflow.com/a/1188145/19114163")
+	logger.Info.Printf("Listening at http://localhost%s\n", addr)
+	logger.Info.Printf("for local dev, use http://127.0.0.1%s, for more information, see: https://stackoverflow.com/a/1188145/19114163\n", addr)
 	logger.Error.Fatal(http.ListenAndServe(addr, app))
 }
 

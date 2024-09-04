@@ -1,92 +1,47 @@
 # Lockers
 
-This is a website for the registration and management of lockers. It was built for the University of Victoria's Engineering and Computer Science Students' Society, so it may not meet your needs exactly.
+Built using the braindead stack of Golang, SQLite, HTMX, and TailwindCSS. Fully SSR, etc etc.
 
-## Running
+## Getting started
 
-The recommended way to run this software is via the Dockerfile included with the repo. These are the required environment variables for it to work:
+### Dependencies
 
-- `JWT_SECRET`: a randomly chosen value for signing tokens
-- `ADMIN_PASSWORD`: the password for the admin panel. Enter the on the login page instead of the email to access the admin panel.
-- `DATABASE_URL`: the connection url for a Planetscale database
-- `GMAIL_USER`: the email for a gmail account
-- `GMAIL_PASSWORD` an application password for a gmail account. This is specially generated for the application, not your regular login.
-- `ORIGIN`: the expected origin URL. This is required to prevent CSRF attacks. You may disable this in the SvelteKit config file.
-- `TZ`: optional. This is a TZ identifier. Set this if you don't want your partially hydrated content to be rendered in UTC.
+Tailwind build tools are the only thing of JS ecosystem that is used in this project.
 
-You should also expose port 3000, as this serves the HTTP connection.
-
-## Development
-
-You should set all of the environment variables above in a `.env` file for use during development.
-
-Run these commands to get setup:
-
-```console
-$ npm install
-$ npm run db:codegen
-```
-
-To run:
-
-```console
-$ npm run dev
-```
-
-To build:
-
-```console
-$ npm run build
-```
-
-You may use any of the scripts in the `db` folder to access the database. All of them require the `DATABASE_URL` environment variable to be set.
-
-Note that this project uses SvelteKit's NodeJS adapter. This means that shared singletons like database connections are acceptable for performance reasons, since it won't be running in a serverless environment. However, any state that MUST persist between connections should be put in the database.
-
-If `git push` hangs, you may need to refer to [this solution](https://stackoverflow.com/a/68711337). I'm assuming this occurs because there are large files in the `vendor` directory.
-
-## Deployment
-
-The app is currently hosted with Google Cloud Platform on a micro instance of Google Compute
-Engine (GCE) and with Docker.
-
-### Build image
-
-Build the image and push it to docker registry, since our local machines are a lot faster at
-this than having to build it on the tiny GCE instance.
+To install dependencies:
 
 ```sh
-npm run docker:deploy
+npm i
 ```
 
-- Note that currently it's being pushed onto my registry at `hn275/ecss-locker`. To whom might
-  be dealing with deployment in the future, you will need to modify the
-  [docker-compose.yml](./docker-compose.yml) file accordingly, as well as the `docker:deploy`
-  npm script in [package.json](./package.json).
+To start a Tailwind _"compiler"_:
+
+```sh
+npm run tw
+```
 
 ### Database migration
 
-The [schema.sql](./db/schema.sql) file now contains the code queries to create the table and to seed
-all the lockers.
-
-### Deploying with Docker
-
-Copy the `./deploy/` directory and the `./docker-compose.yml` file onto VM/cloud instance.
-
-On your cloud instance, start the docker in daemon mode (you may have to run it with `sudo` if your
-user is not in the docker group):
-
 ```sh
-docker compose up -d
+go run ./cmd/migration
 ```
 
-Migrate the database with the script in `./deploy/migratedb.sh`.\
-**NOTE:** this wipes the database clean before applying the database schema.
+### Starts the app
 
 ```sh
-sh ./deploy/migratedb.sh
+go run ./cmd/app
 ```
 
-## Design
+Note: for auth cookie to work, go on your browser `http://127.0.0.1:8080`
 
-This website was designed for maximum usability on mobile devices with unstable or slow internet. Excluding admin functionality, the entire website has a mobile-first layout and works without JavaScript. JavaScript is used to progressively enhance the experience with features such as loading states and a client-side router.
+### Environment variables
+
+- `EMAIL_HOST_ADDRESS`: ECSS associated email (gmail) for sending locker-related email from
+- `EMAIL_HOST_PASSWORD`: ECSS gmail's App password (if using Gmail, which is likely...)
+- `SUPPORT_EMAIL`: Email (any type) for questions to be directed to
+- `CIPHER_KEY`: base64 encoding for a cipher key, run `go run ./cmd/keygen` to generate one.
+- `DOMAIN`: Hosting domain
+- `DATABASE_URL`: Turso database url
+- `DATABASE_AUTH_TOKEN`: Tursor database auth token
+- `ADMIN_USERNAME`: admin username
+- `ADMIN_PASSWORD`: admin password

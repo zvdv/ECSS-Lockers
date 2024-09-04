@@ -1,0 +1,27 @@
+{{define "base"}}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+        <link rel="stylesheet" type="text/css" href="/assets/css/index.css" />
+        <link rel="icon" type="image/x-icon" href="/assets/favicon.png">
+        <script src="/assets/js/htmx.min.js" defer></script>
+        <title>ECSS' Locker Registration</title>
+    </head>
+
+    <body id="container" class="h-[100vh] overflow-y-hidden flex flex-col justify-center items-center">
+        {{template "nav" .}}
+
+        <div class="h-full grow">
+            {{template "content" .}}
+        </div>
+
+        <footer class="fixed bottom-0 flex justify-center items-center w-full p-5">
+            <span class="text-xs md:text-sm">
+                Having issues? Contact <a class="link link-info" target="blank_" href="mailto:dirit@uvicecss.ca">dirit@uvicecss.ca<a/>.
+            </span>
+        </footer>
+    </body>
+</html>
+{{end}}

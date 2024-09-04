@@ -1,0 +1,44 @@
+{{define "content"}}
+<main class="max-w-screen-sm mx-auto h-full grid place-items-center">
+  <section>
+    <form
+      hx-put="/dash/locker/register?locker={{.}}"
+      class="flex flex-col justify-center items-center gap-5"
+      hx-disabled-elt="find button[type='submit'], find input[type='text']"
+    >
+      <div class="flex flex-col justify-center items-center">
+        <span class="text-sm">Registering for locker</span>
+        <input
+          type="text"
+          name="locker"
+          value="{{.}}"
+          disabled
+          class="text-primary text-center text-3xl font-semibold w-40"
+        />
+      </div>
+
+      <label class="input input-bordered flex items-center gap-2">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 16 16"
+          fill="currentColor"
+          class="h-4 w-4 opacity-70"
+        >
+          <path
+            d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM12.735 14c.618 0 1.093-.561.872-1.139a6.002 6.002 0 0 0-11.215 0c-.22.578.254 1.139.872 1.139h9.47Z"
+          />
+        </svg>
+        <input
+          type="text"
+          class="grow"
+          name="name"
+          placeholder="Name"
+          required
+        />
+      </label>
+
+      <button type="submit" class="btn btn-block btn-primary">Register</button>
+    </form>
+  </section>
+</main>
+{{end}}

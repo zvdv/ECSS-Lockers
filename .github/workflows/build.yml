@@ -1,0 +1,25 @@
+on: [push]
+
+name: CI
+
+jobs:
+  build:
+    name: Test, build, and format checker
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.23.0"
+      - name: Test
+        run: go test ./... -v
+      - name: Build App
+        run: go build ./cmd/app
+      - name: Build Migration script
+        run: go build ./cmd/migration
+      - name: Build Keygen script
+        run: go build ./cmd/keygen
+      - name: Format
+        run: |
+          diff=$(gofmt -e -d .); \
+          [[ -z $diff ]] || (echo ; echo "Reformat your code with \"gofmt -w .\"" ; exit 1)

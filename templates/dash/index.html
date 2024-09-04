@@ -1,0 +1,39 @@
+{{define "content"}}
+<main class="grid h-full place-items-center">
+  {{if .HasLocker}}
+
+  <div class="text-center">
+    <h2 class="text-lg">Locker registered!</h2>
+    <h1 class="text-primary text-5xl font-semibold">{{.LockerName}}</h1>
+    <span class="text-xs opacity-60 italic">Expire on {{.ExpireAt}}</span>
+  </div>
+
+  {{else}}
+
+  <section class="flex flex-col gap-3 justify-start items-center">
+    <h3>You have no locker registered for this term.</h3>
+    <h2 class="text-primary text-xl">Locker registration:</h2>
+    <form
+      hx-put="/api/dash/register"
+      hx-target="#locker-list"
+      hx-swap="innerHTML"
+      class="p-3 shadow rounded-lg w-max"
+    >
+      <label class="input input-bordered flex items-center gap-2">
+        ELW
+        <input
+          name="locker"
+          hx-put="/dash/api/locker"
+          hx-trigger="keyup changed delay:500ms"
+          type="number"
+          class="grow"
+        />
+      </label>
+    </form>
+
+    <section id="locker-list"></section>
+  </section>
+
+  {{end}}
+</main>
+{{end}}

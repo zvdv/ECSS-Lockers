@@ -1,0 +1,12 @@
+{{define "content"}}
+<main class="h-full grid place-items-center">
+  <div class="flex flex-col gap-3 justify-center items-center">
+    <h1 class="text-3xl font-bold text-primary">Session Expired</h1>
+        {{if .IsAdmin}}
+        <a href="/auth/admin" class="link text-sm">Login again</a>
+        {{else}}
+        <a href="/" class="link text-sm">Login again</a>
+        {{end}}
+  </div>
+</main>
+{{end}}

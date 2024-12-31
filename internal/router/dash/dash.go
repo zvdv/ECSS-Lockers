@@ -124,7 +124,9 @@ func ApiLocker(w http.ResponseWriter, r *http.Request) {
 		logger.Error.Fatal("stmt error:", err)
 	}
 
-	locker = fmt.Sprintf("%%ELW %d%%", lockerNum)
+	//locker = fmt.Sprintf("%%ELW %d%%", lockerNum)
+	locker = fmt.Sprintf("%%%d%%", lockerNum)
+	// this should fix the bug and make it easier to add the ecs building later
 
 	rows, err := stmt.Query(locker)
 	if err != nil {

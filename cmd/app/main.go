@@ -66,6 +66,7 @@ func main() {
 		r.Handle("/", http.HandlerFunc(dash.Dash))
 		r.Handle("/locker/register", http.HandlerFunc(dash.DashLockerRegister))
 		r.Handle("/api/locker", http.HandlerFunc(dash.ApiLocker))
+		r.Post("/deregister", dash.DashDeregister)
 	})
 
 	app.Route("/admin", func(r chi.Router) {

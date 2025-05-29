@@ -243,4 +243,39 @@ func DashLockerRegister(w http.ResponseWriter, r *http.Request) {
 	}
 
 	httputil.WriteTemplateComponent(w, nil, "templates/dash/locker_register_ok.html")
+
+}
+func DashDeregister(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		httputil.WriteResponse(w, http.StatusMethodNotAllowed, nil)
+		return
+	}
+
+	userEmail, err := httputil.ExtractUserEmail(r)
+	if err != nil {
+		logger.Error.Printf("error extracting user email: %v\n", err)
+		httputil.WriteResponse(w, http.StatusInternalServerError, nil)
+		return
+	}
+
+	db, lock := database.Lock()
+	defer lock.Unlock()
+
+	stmt, err := db.Prepare(`DELETE FROM registration WHERE user = :email`)
+	if err != nil {
+		logger.Error.Printf("failed to prepare delete statement: %v\n", err)
+		httputil.WriteResponse(w, http.StatusInternalServerError, nil)
+		return
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(sql.Named("email", userEmail))
+	if err != nil {
+		logger.Error.Printf("error deregistering locker: %v\n", err)
+		httputil.WriteResponse(w, http.StatusInternalServerError, nil)
+		return
+	}
+
+	httputil.WriteTemplateComponent(w, nil, "templates/dash/locker_register_ok.html")
+
 }
